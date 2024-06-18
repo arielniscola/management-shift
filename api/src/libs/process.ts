@@ -120,6 +120,18 @@ export class Process extends EventEmitter {
 
     return processUpdate;
   }
+  /**
+   * Cambiar tiempo de cron
+   * @param cronTime Nuevo tiempo de cron
+   */
+  changeCronTime(cronTime: string) {
+    log.info(
+      `process.changeCronTime() Cambiar tiempo de cron de ${this._info.name} a ${cronTime}`
+    );
+    this._cronTime = cronTime;
+    this._task.stop();
+    this.start();
+  }
   /** Registrar ejecucion
    * @param notes Resultado de la ejecucion
    * @param error Error de la ejecucion?

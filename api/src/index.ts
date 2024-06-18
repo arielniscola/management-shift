@@ -121,7 +121,7 @@ export class ShifManagement {
       const options = ShifManagement._options;
 
       /** Conexion a la BD */
-      await DB.connect("");
+      await DB.connect(options.db.uri);
 
       /**
        * Leemos los procesos disponibles
@@ -150,5 +150,5 @@ export class ShifManagement {
     return value;
   }
 }
-
+export const defineOptions = (data: IShiftManagementOptions) => data;
 export default ShifManagement;

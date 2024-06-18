@@ -8,7 +8,7 @@ const log = new Log("DB");
  * @param {string} uri URI de conexion a la Base de Datos
  * @returns Instancia de conexion a la Base de Datos
  * @example
- * const db = new DB('mongodb://localhost:27017/fiscalflow');
+ * const db = new DB('mongodb://localhost:27017/shiftmanagement');
  * await db.connect();
  */
 
