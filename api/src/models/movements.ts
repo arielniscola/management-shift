@@ -8,6 +8,7 @@ export interface IMovement {
   totalAmount: number;
   state: string;
   paymentMethod: IPaymentMethod;
+  companyCode: string;
 }
 
 const MovementSchema = createSchema<IMovement>({
@@ -31,6 +32,10 @@ const MovementSchema = createSchema<IMovement>({
   paymentMethod: {
     type: PaymentMethodSchema,
     required: false,
+  },
+  companyCode: {
+    type: String,
+    required: true,
   },
 });
 

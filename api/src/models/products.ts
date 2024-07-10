@@ -36,6 +36,10 @@ export const ProductSchema = createSchema<IProduct>(
       type: String,
       required: true,
     },
+    stock: {
+      type: Number,
+      required: false,
+    },
   },
   {
     timestamps: false,
