@@ -1,7 +1,8 @@
 import { DB } from "./libs/db";
 import Log from "./libs/logger";
 import processManager from "./libs/processManager";
-import { IRoutes } from "./routes";
+import AppServer from "./libs/server";
+import { IRoutes } from "./routes/index";
 import { AlertConfig } from "./services/alertConfig";
 
 export interface IShiftManagementOptions {
@@ -124,13 +125,24 @@ export class ShifManagement {
       await DB.connect(options.db.uri);
 
       /**
+       * TODO:
+       *  Upgrade scripts
+       *  Bootstrap
+       *  Menu build
+       */
+
+      /**
        * Leemos los procesos disponibles
        */
       processManager.loadProcesses(options.processesPath);
 
+      /** Cramos el cliente AppServer */
+      await AppServer.start(options.server.port, {
+        routes: options.routes,
+      });
       /** Marcamos al Servidor como inicializado */
-      log.info(`Servidor inicializado: ${this._initialized}`);
       this._initialized = true;
+      log.info(`Servidor inicializado: ${this._initialized}`);
     } catch (err) {
       log.error(err, `Error al iniciar servidor: ${err.message}`);
       throw err;

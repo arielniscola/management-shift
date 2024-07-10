@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { Permission } from "../libs/permitions";
 
 /** Metodos HTTP */
 type IRouteMethod = "get" | "post" | "put" | "delete" | "patch";
@@ -26,10 +27,14 @@ export interface IRoute {
   label: string;
   /** Endpoint oculto- Por defecto false */
   hide?: boolean;
+  /** Controlador */
+  controller: IRouteController;
   /** Metodo HTTP */
   method: IRouteMethod;
   /** Middleware: validacion de token. Por defecto true */
   auth?: boolean;
+  /** Permiso asociado */
+  permission?: Permission[];
 }
 
 export interface IParentRoute {

@@ -16,3 +16,12 @@ export const DEFAULT_COMPANY = {
   email: "arielniscola@gmail.co,",
   activitiesStartDate: new Date(),
 };
+
+/**
+ * Usuario por defecto (suser)
+ */
+export const DEFAULT_LOG_LEVEL = {
+  ALTO: 1,
+  MEDIO: 2,
+  BAJO: 3,
+};

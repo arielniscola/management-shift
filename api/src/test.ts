@@ -1,6 +1,7 @@
 import ShifManagement, { defineOptions } from ".";
 import dotenv from "dotenv";
-import { defineRoutes } from "./routes";
+import routes from "./routes";
+
 dotenv.config();
 
 const CONFIGS = defineOptions({
@@ -17,55 +18,7 @@ const CONFIGS = defineOptions({
     frequency: "1m",
   },
   bootstrapScripts: [],
-  routes: defineRoutes([
-    /** Dashboard */
-    {
-      label: "Dashboard",
-      icon: "fa-chart-line",
-      routes: [],
-    },
-    /** Negocio */
-    {
-      label: "Negocio",
-      icon: "fa-store",
-      type: "business",
-      routes: [],
-    },
-    /** Documentos Fiscales */
-    {
-      label: "Documentos Fiscales",
-      icon: "fa-file-invoice",
-      routes: [],
-    },
-    /** Datos Maestros */
-    {
-      label: "Datos Maestros",
-      icon: "fa-code",
-      routes: [],
-      type: "masterdata",
-    },
-    /** Monitoreo */
-    {
-      label: "Monitoreo",
-      icon: "fa fa-desktop",
-      routes: [],
-      type: "monitoring",
-    },
-    /** Administracion */
-    {
-      label: "Administracion",
-      icon: "fa fa-clipboard",
-      routes: [],
-      type: "administration",
-    },
-    /** Seguridad */
-    {
-      label: "Seguridad",
-      icon: "fa-fingerprint",
-      routes: [],
-      type: "security",
-    },
-  ]),
+  routes,
 });
 
 (async () => {
