@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Transition from "../utils/transitions";
 
-import UserAvatar from "../images/user-avatar-32.png";
+import UserAvatar from "../images/templo-logo.jpeg";
 
 interface DropdownProfileProps {
   align: string;
@@ -60,7 +60,7 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({ align }) => {
         />
         <div className="flex items-center truncate">
           <span className="truncate ml-2 text-sm font-medium dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-slate-200">
-            Acme Inc.
+            El Templo Padel
           </span>
           <svg
             className="w-3 h-3 shrink-0 ml-1 fill-current text-slate-400"
@@ -90,7 +90,7 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({ align }) => {
         >
           <div className="pt-0.5 pb-2 px-3 mb-1 border-b border-slate-200 dark:border-slate-700">
             <div className="font-medium text-slate-800 dark:text-slate-100">
-              Acme Inc.
+              Templo Padel
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 italic">
               Administrator

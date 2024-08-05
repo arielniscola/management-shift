@@ -6,10 +6,11 @@ import "./css/style.css";
 // Import pages
 import Dashboard from "./pages/Dashboard";
 import DailyMovements from "./pages/DailyMovements";
-import PaymentMethod from "./pages/PaymentMethod";
-import Product from "./pages/Product";
-import Sales from "./pages/Sales";
-
+import PaymentMethod from "./pages/PaymentMethod/PaymentMethod";
+import Product from "./pages/Product/Product";
+import ProductForm from "./pages/Product/Form";
+import Sales from "./pages/movement/Sales";
+import PaymentMethodForm from "./pages/PaymentMethod/form";
 function App() {
   const location = useLocation();
 
@@ -26,8 +27,13 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/sales" element={<Sales />} />
         <Route path="/product" element={<Product />} />
+        <Route path="/product/form/:id?" element={<ProductForm />} />
         <Route path="/daily-movement" element={<DailyMovements />} />
         <Route path="/payment-methods" element={<PaymentMethod />} />
+        <Route
+          path="/payment-methods/form/:id?"
+          element={<PaymentMethodForm />}
+        />
       </Routes>
     </>
   );

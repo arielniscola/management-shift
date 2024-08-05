@@ -1,48 +1,46 @@
+import React from "react";
 import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/material_blue.css";
 
-interface DatepickerProps {
-  align: string;
+interface DatepickerWithIconProps {
+  setDate: (data: any) => void;
+  defaultValue: string;
 }
 
-const Datepicker: React.FC<DatepickerProps> = ({ align }) => {
+const DatepickerWithIcon: React.FC<DatepickerWithIconProps> = ({
+  setDate,
+  defaultValue,
+}) => {
   const options = {
-    mode: "range",
-    static: true,
-    monthSelectorType: "static",
-    dateFormat: "M j, Y",
-    defaultDate: [new Date().setDate(new Date().getDate() - 6), new Date()],
-    prevArrow:
-      '<svg class="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
-    nextArrow:
-      '<svg class="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M1.4 10.8L0 9.4l4-4-4-4L1.4 0l5.4 5.4z" /></svg>',
-    onReady: (selectedDates: Date[], dateStr: string, instance: any) => {
-      instance.element.value = dateStr.replace("to", "-");
-      console.log(selectedDates);
-      const customClass = align ? align : "";
-      instance.calendarContainer.classList.add(`flatpickr-${customClass}`);
-    },
-    onChange: (selectedDates: Date[], dateStr: string, instance: any) => {
-      instance.element.value = dateStr.replace("to", "-");
-      console.log(selectedDates);
-    },
+    dateFormat: "Y-m-d",
+    allowInput: true,
+    altInput: true,
+    altFormat: "F j, Y",
+    defaultDate: new Date(),
   };
 
   return (
-    <div className="relative">
-      <Flatpickr
-        className="form-input pl-9 dark:bg-slate-800 text-slate-500 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200 font-medium w-[15.5rem]"
-        options={options}
-      />
-      <div className="absolute inset-0 right-auto flex items-center pointer-events-none">
+    <div className="relative max-w-sm">
+      <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
         <svg
-          className="w-4 h-4 fill-current text-slate-500 dark:text-slate-400 ml-3"
-          viewBox="0 0 16 16"
+          className="w-4 h-4 text-gray-500 dark:text-gray-400"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
         >
-          <path d="M15 2h-2V0h-2v2H9V0H7v2H5V0H3v2H1a1 1 0 00-1 1v12a1 1 0 001 1h14a1 1 0 001-1V3a1 1 0 00-1-1zm-1 12H2V6h12v8z" />
+          <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
         </svg>
       </div>
+      <Flatpickr
+        options={options}
+        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Seleccionar fecha"
+        onChange={setDate}
+        value={defaultValue}
+      />
     </div>
   );
 };
 
-export default Datepicker;
+export default DatepickerWithIcon;
