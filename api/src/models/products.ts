@@ -5,7 +5,7 @@ export interface IProduct {
   name: string;
   description: string;
   price: number;
-  units: string;
+  units: Number;
   stock: number;
   companyCode: string;
 }
@@ -29,12 +29,12 @@ export const ProductSchema = createSchema<IProduct>(
       required: true,
     },
     units: {
-      type: String,
+      type: Number,
       required: false,
     },
     companyCode: {
       type: String,
-      required: true,
+      required: false,
     },
     stock: {
       type: Number,
@@ -46,6 +46,6 @@ export const ProductSchema = createSchema<IProduct>(
   }
 );
 
-ProductSchema.index({ code: 1, companyCode: 1 }, { unique: true });
+ProductSchema.index({ code: 1, companyCode: 1 });
 
 export const ProductModel = createModel("product", ProductSchema);
