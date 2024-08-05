@@ -30,7 +30,7 @@ interface BarChart03Props {
 }
 
 const BarChart: FC<BarChart03Props> = ({ data, width, height }) => {
-  const [chart, setChart] = useState<Chart<"bar"> | null>(null);
+  const [_chart, setChart] = useState<Chart<"bar"> | null>(null);
   const canvas = useRef<HTMLCanvasElement | null>(null);
   const legend = useRef<HTMLUListElement | null>(null);
 
@@ -105,7 +105,7 @@ const BarChart: FC<BarChart03Props> = ({ data, width, height }) => {
       plugins: [
         {
           id: "htmlLegend",
-          afterUpdate(c, args, options) {
+          afterUpdate(c, _args, _options) {
             const ul = legend.current;
             if (!ul || !c.options.plugins?.legend?.labels) return;
             // Remove old legend items

@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import SidebarLinkGroup from "./SiderbarLinkGroup";
+
 import UserAvatar from "../images/templo-logo.jpeg";
 interface SidebarProps {
   sidebarOpen: boolean;
