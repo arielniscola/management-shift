@@ -1,5 +1,8 @@
 import { defineRoutes } from "./routes/index";
 import { ProductController } from "./controllers/product";
+import { PaymentMethodController } from "./controllers/paymentMethod";
+import { MovementController } from "./controllers/movements";
+import { DailyBalanceController } from "./controllers/dailyBalance";
 
 /**
  * Declaracion de Rutas.
@@ -27,8 +30,8 @@ const routes = defineRoutes([
     icon: "fa-store",
     type: "business",
     routes: [
-      /** Menu de Compañia */
-      // Grilla
+      /** Menu Principal */
+      // Producto
       {
         path: "/product",
         label: "Producto",
@@ -41,6 +44,79 @@ const routes = defineRoutes([
         label: "Producto",
         method: "post",
         controller: ProductController.create,
+        auth: false,
+      },
+      {
+        path: "/product",
+        label: "Producto",
+        method: "put",
+        controller: ProductController.update,
+        auth: false,
+      },
+      {
+        path: "/product/:id",
+        label: "Eliminar producto",
+        method: "delete",
+        controller: ProductController.delete,
+        auth: false,
+      },
+      // Metodos de pago
+      {
+        path: "/paymentMethod",
+        label: "Metodo de pago",
+        method: "get",
+        controller: PaymentMethodController.find,
+        auth: false,
+      },
+      {
+        path: "/paymentMethod",
+        label: "Crear Metodo de pago",
+        method: "post",
+        controller: PaymentMethodController.create,
+        auth: false,
+      },
+      {
+        path: "/paymentMethod",
+        label: "Actualizar Metodo de pago",
+        method: "put",
+        controller: PaymentMethodController.update,
+        auth: false,
+      },
+      {
+        path: "/paymentMethod/:id",
+        label: "Eliminar Metodo de pago",
+        method: "delete",
+        controller: PaymentMethodController.delete,
+        auth: false,
+      },
+      // Ventas
+      {
+        path: "/movement",
+        label: "Ventas",
+        method: "get",
+        controller: MovementController.find,
+        auth: false,
+      },
+      {
+        path: "/movement",
+        label: "Crear Ventas",
+        method: "post",
+        controller: MovementController.create,
+        auth: false,
+      },
+      {
+        path: "/movement",
+        label: "Actualizar Ventas",
+        method: "put",
+        controller: MovementController.update,
+        auth: false,
+      },
+      // Balance Diario
+      {
+        path: "/daily-balance",
+        label: "Cierre balance",
+        method: "get",
+        controller: DailyBalanceController.find,
         auth: false,
       },
     ],

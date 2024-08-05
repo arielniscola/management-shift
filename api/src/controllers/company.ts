@@ -1,6 +1,6 @@
 import Log from "../libs/logger";
 import { ICompany } from "../models/company";
-import { IRouteController } from "../routes";
+import { IRouteController } from "../routes/index";
 import { companyService } from "../services/company";
 
 export class CompanyController {

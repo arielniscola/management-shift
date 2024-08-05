@@ -6,13 +6,14 @@ export interface IPaymentMethod {
   description: string;
   identificationNumber: string;
   alias: string;
+  colorBanner: string;
 }
 
 export const PaymentMethodSchema = createSchema<IPaymentMethod>(
   {
     companyCode: {
       type: String,
-      required: true,
+      required: false,
     },
     name: {
       type: String,
@@ -27,6 +28,10 @@ export const PaymentMethodSchema = createSchema<IPaymentMethod>(
       required: false,
     },
     alias: {
+      type: String,
+      required: false,
+    },
+    colorBanner: {
       type: String,
       required: false,
     },

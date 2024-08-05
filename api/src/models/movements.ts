@@ -1,14 +1,18 @@
+import { ObjectId } from "mongoose";
 import { createModel, createSchema } from ".";
 import { IPaymentMethod, PaymentMethodSchema } from "./paymentMethod";
 import { IProduct, ProductSchema } from "./products";
 
 export interface IMovement {
+  _id: ObjectId;
   date: Date;
   details: IProduct[];
   totalAmount: number;
   state: string;
   paymentMethod: IPaymentMethod;
   companyCode: string;
+  processed: Boolean;
+  client: string;
 }
 
 const MovementSchema = createSchema<IMovement>({
@@ -36,6 +40,15 @@ const MovementSchema = createSchema<IMovement>({
   companyCode: {
     type: String,
     required: true,
+  },
+  processed: {
+    type: Boolean,
+    require: true,
+    default: false,
+  },
+  client: {
+    type: String,
+    required: false,
   },
 });
 
