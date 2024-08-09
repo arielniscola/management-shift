@@ -21,48 +21,55 @@ class ProcessManagerLib {
    * Cargar procesos desde un path dado
    * @param processesPath Path de procesos
    */
-  loadProcesses(
-    processesPath: string = path.join(process.cwd(), "processes")
-  ) {
+  loadProcesses(processesPath: string = path.join(process.cwd(), "processes")) {
     /** Solo cargar procesos en caso de que el path exista */
-    if(!fs.existsSync(processesPath)) return;
+    if (!fs.existsSync(processesPath)) return;
     /** Leer los archivos del path */
-    const processesFiles = fs.readdirSync(processesPath).map(file => {
-      const split = file.split(".");
-      return [split[0], file]
-    }).filter(file => file[0] !== "index" && !file[1].endsWith(".map") && !file[1].endsWith(".gitkeep") && !file[1].endsWith(".d.ts"))
+    const processesFiles = fs
+      .readdirSync(processesPath)
+      .map((file) => {
+        const split = file.split(".");
+        return [split[0], file];
+      })
+      .filter(
+        (file) =>
+          file[0] !== "index" &&
+          !file[1].endsWith(".map") &&
+          !file[1].endsWith(".gitkeep") &&
+          !file[1].endsWith(".d.ts")
+      );
     /** Cargarlos en el array de procesos*/
-    for(const [name, file] of processesFiles){
-        const processFunction = require(path.join(processesPath, file)).default;
-        if(processFunction instanceof Process){
-          this._processes.push(processFunction)
-        }
+    for (const [name, file] of processesFiles) {
+      const processFunction = require(path.join(processesPath, file)).default;
+      if (processFunction instanceof Process) {
+        this._processes.push(processFunction);
+      }
     }
   }
-   /**
-     * Obtener proceso por codigo de cron
-     */
-   getProcessByCronCode(cronCode: string) {
-    return this._processes.find(p => p.info.cronVar === cronCode)
-}
- /**
-     * Obtener proceso por codigo
-     */
- getProcessByCode(code: string) {
-  return this._processes.find(p => p.info.code === code)
-}
- /**
-     * Ejecutar proceso por codigo de proceso
-     * @param code Codigo de proceso
-     */
- async runProcessByCode(code: string) {
-  const process = this.getProcessByCode(code)
-  if (process) {
-      return process.run();
+  /**
+   * Obtener proceso por codigo de cron
+   */
+  getProcessByCronCode(cronCode: string) {
+    return this._processes.find((p) => p.info.cronVar === cronCode);
   }
-  throw new Error("No se encontro el proceso")
-}
+  /**
+   * Obtener proceso por codigo
+   */
+  getProcessByCode(code: string) {
+    return this._processes.find((p) => p.info.code === code);
+  }
+  /**
+   * Ejecutar proceso por codigo de proceso
+   * @param code Codigo de proceso
+   */
+  async runProcessByCode(code: string) {
+    const process = this.getProcessByCode(code);
+    if (process) {
+      return process.run();
+    }
+    throw new Error("No se encontro el proceso");
+  }
 }
 
-export const ProcessManager = new ProcessManagerLib()
+export const ProcessManager = new ProcessManagerLib();
 export default ProcessManager;
