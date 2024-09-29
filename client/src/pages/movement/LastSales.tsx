@@ -81,7 +81,9 @@ const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
                     <div className="grow flex justify-between">
                       <div className="self-center">
                         <span className="font-medium text-slate-800 hover:text-slate-900 dark:text-slate-100 dark:hover:text-white">
-                          {mov.client ? mov.client : "Sin cliente"}
+                          {mov.client && typeof mov.client == "object"
+                            ? `${mov.client.firstname} ${mov.client.lastname}`
+                            : "Sin cliente"}
                         </span>
                       </div>
                       <div

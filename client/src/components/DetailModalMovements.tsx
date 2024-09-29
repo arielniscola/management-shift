@@ -9,7 +9,7 @@ interface DatailModalMovementsProps {
   movement?: IMovement;
 }
 
-const ModalPaymentMethod: React.FC<DatailModalMovementsProps> = ({
+const ModalDetailMovements: React.FC<DatailModalMovementsProps> = ({
   id,
   modalOpen,
   setModalOpen,
@@ -75,7 +75,10 @@ const ModalPaymentMethod: React.FC<DatailModalMovementsProps> = ({
             <div className="p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-8 dark:bg-gray-800 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
-                  Cliente: {movement?.client ? movement.client : "Sin cliente"}
+                  Cliente:{" "}
+                  {movement?.client && typeof movement.client == "object"
+                    ? `${movement.client.firstname} ${movement.client.lastname}`
+                    : "Sin cliente"}
                 </h5>
                 {movement?.state === "paid" ? (
                   <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
@@ -120,4 +123,4 @@ const ModalPaymentMethod: React.FC<DatailModalMovementsProps> = ({
   );
 };
 
-export default ModalPaymentMethod;
+export default ModalDetailMovements;

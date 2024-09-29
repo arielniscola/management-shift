@@ -16,6 +16,7 @@ const DailyMovements = () => {
   const [movements, setMovements] = useState<IMovement[]>([]);
   const [dailyBalance, setDailyBalance] = useState<IDailyBalance>();
   const [date, setDate] = useState<string>(moment(new Date()).toISOString());
+  const [reload, setReload] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchMovements = async () => {
@@ -28,7 +29,7 @@ const DailyMovements = () => {
       }
     };
     fetchMovements();
-  }, [date]);
+  }, [date, reload]);
 
   const setDateHandler = (e: string[]) => {
     setDate(moment(e[0]).toISOString());
@@ -69,6 +70,8 @@ const DailyMovements = () => {
               <DailyMovementsCard
                 movements={movements}
                 balance={dailyBalance}
+                setReload={setReload}
+                reload={reload}
               />
             </div>
           </div>

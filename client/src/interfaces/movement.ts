@@ -1,3 +1,4 @@
+import { IClient } from "./client";
 import { IPaymentMethod } from "./paymentMethod";
 import { IProduct } from "./producto";
 
@@ -8,5 +9,5 @@ export interface IMovement {
   totalAmount: number;
   state: string;
   paymentMethod?: IPaymentMethod;
-  client: string;
+  client: string | IClient;
 }

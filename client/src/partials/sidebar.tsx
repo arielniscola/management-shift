@@ -202,7 +202,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </NavLink>
               </li>
-              {/* Calendar */}
+              {/* Movimientos */}
               <li
                 className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${
                   pathname.includes("daily-movement") && "bg-slate-900"
@@ -238,6 +238,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </svg>
                     <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
                       Caja
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
+              {/* Clientes */}
+              <li
+                className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${
+                  pathname.includes("clients") && "bg-slate-900"
+                }`}
+              >
+                <NavLink
+                  end
+                  to="/clients"
+                  className={`block text-slate-200 truncate transition duration-150 ${
+                    pathname.includes("clients")
+                      ? "hover:text-slate-200"
+                      : "hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
+                      <path
+                        className={`fill-current ${
+                          pathname.includes("clients")
+                            ? "text-indigo-500"
+                            : "text-slate-600"
+                        }`}
+                        d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z"
+                      />
+                      <path
+                        className={`fill-current ${
+                          pathname.includes("clients")
+                            ? "text-indigo-300"
+                            : "text-slate-400"
+                        }`}
+                        d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z"
+                      />
+                    </svg>
+
+                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                      Clientes
                     </span>
                   </div>
                 </NavLink>
