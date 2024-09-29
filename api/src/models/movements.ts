@@ -1,7 +1,8 @@
-import { ObjectId } from "mongoose";
+import { ObjectId, Schema } from "mongoose";
 import { createModel, createSchema } from ".";
 import { IPaymentMethod, PaymentMethodSchema } from "./paymentMethod";
 import { IProduct, ProductSchema } from "./products";
+import { IClient } from "./client";
 
 export interface IMovement {
   _id: ObjectId;
@@ -12,7 +13,7 @@ export interface IMovement {
   paymentMethod: IPaymentMethod;
   companyCode: string;
   processed: Boolean;
-  client: string;
+  client: string | IClient;
 }
 
 const MovementSchema = createSchema<IMovement>({
@@ -47,7 +48,8 @@ const MovementSchema = createSchema<IMovement>({
     default: false,
   },
   client: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: "client",
     required: false,
   },
 });

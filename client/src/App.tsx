@@ -11,6 +11,7 @@ import Product from "./pages/Product/Product";
 import ProductForm from "./pages/Product/Form";
 import Sales from "./pages/movement/Sales";
 import PaymentMethodForm from "./pages/PaymentMethod/form";
+import ClientView from "./pages/client/clientsView";
 function App() {
   const location = useLocation();
 
@@ -34,6 +35,7 @@ function App() {
           path="/payment-methods/form/:id?"
           element={<PaymentMethodForm />}
         />
+        <Route path="/clients" element={<ClientView />} />
       </Routes>
     </>
   );

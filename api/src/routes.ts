@@ -3,6 +3,7 @@ import { ProductController } from "./controllers/product";
 import { PaymentMethodController } from "./controllers/paymentMethod";
 import { MovementController } from "./controllers/movements";
 import { DailyBalanceController } from "./controllers/dailyBalance";
+import { ClientController } from "./controllers/client";
 
 /**
  * Declaracion de Rutas.
@@ -111,12 +112,55 @@ const routes = defineRoutes([
         controller: MovementController.update,
         auth: false,
       },
+      {
+        path: "/movement/:id",
+        label: "Eliminar Ventas",
+        method: "delete",
+        controller: MovementController.delete,
+        auth: false,
+      },
       // Balance Diario
       {
         path: "/daily-balance",
         label: "Cierre balance",
         method: "get",
         controller: DailyBalanceController.find,
+        auth: false,
+      },
+      // Clients
+      {
+        path: "/clients",
+        label: "Buscar Clientes",
+        method: "get",
+        controller: ClientController.find,
+        auth: false,
+      },
+      {
+        path: "/clients",
+        label: "Crear Clientes",
+        method: "post",
+        controller: ClientController.create,
+        auth: false,
+      },
+      {
+        path: "/clients",
+        label: "Actualizar Clientes",
+        method: "put",
+        controller: ClientController.update,
+        auth: false,
+      },
+      {
+        path: "/clients/:id",
+        label: "Eliminar cliente",
+        method: "delete",
+        controller: ClientController.delete,
+        auth: false,
+      },
+      {
+        path: "/clients/:id",
+        label: "Movimientos cliente",
+        method: "get",
+        controller: ClientController.getMovementClient,
         auth: false,
       },
     ],

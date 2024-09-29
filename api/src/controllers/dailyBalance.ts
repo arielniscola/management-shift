@@ -14,14 +14,20 @@ export class DailyBalanceController {
     try {
       const companyCode = res.locals.companyCode;
       const startDate = moment(req.query.date, "YYYY/MM/DD");
-      const endDate = moment(req.query.date, "YYYY/MM/DD").endOf("day");
+      const endDate = moment(req.query.date, "YYYY/MM/DD")
+        .endOf("day")
+        .add(3, "h");
       const filter = {
         ...{ companyCode: companyCode },
         ...(req.query.date
           ? { date: { $gte: startDate.toDate(), $lte: endDate.toDate() } }
           : {}),
       };
-      const movements = await movementService.find(filter);
+      const movements = await movementService.find(
+        filter,
+        {},
+        { populate: "client" }
+      );
 
       const balance = await dailyBalanceService.findOne(filter);
 

@@ -4,6 +4,12 @@ import { IMovement } from "../interfaces/movement";
 import { IDailyBalance } from "../interfaces/dailyBalance";
 import ModalPaymentMethod from "./DetailModalMovements";
 import moment from "moment";
+import ModalDelete from "./DeleteModal";
+import { deleteMovement } from "../services/movementService";
+import toast, { Toaster } from "react-hot-toast";
+
+const notify = (msg: string) => toast.success(msg);
+const notifyError = (msg: string) => toast.error(msg);
 
 interface IDataSet {
   label: string;
@@ -16,11 +22,15 @@ interface IDataSet {
 
 interface DailyMovementsProps {
   movements: IMovement[];
+  setReload: (reload: boolean) => void;
+  reload: boolean;
   balance?: IDailyBalance;
 }
 const DailyMovementsCard: FC<DailyMovementsProps> = ({
   movements,
   balance,
+  setReload,
+  reload,
 }) => {
   const [selectedMov, setSelectedMov] = useState<IMovement>();
   const [methodModalOpen, setMethodModalOpen] = useState(false);
@@ -29,6 +39,8 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
     labels: string[];
   }>({ datasets: [], labels: ["Reasons"] });
   const [totalAmountMov, setTotalAmountMov] = useState<number>(0);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string>();
 
   useEffect(() => {
     let dataSets: IDataSet[] = [];
@@ -74,6 +86,21 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
     setChartData({ datasets: dataSets, labels: ["Reasons"] });
     setTotalAmountMov(totalAmount);
   }, [movements]);
+
+  const deleteHandler = async () => {
+    try {
+      const res = await deleteMovement(deleteId);
+      if (res.ack) {
+        notifyError(res.message ? res.message : "error");
+      } else {
+        notify(res.message ? res.message : "ok");
+      }
+      setDeleteModalOpen(false);
+      setReload(!reload);
+    } catch (error) {
+      notifyError(error ? error.toString() : "error");
+    }
+  };
 
   return (
     <div>
@@ -132,7 +159,9 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
                       scope="row"
                       className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                     >
-                      {mov.client ? mov.client : "Sin Cliente"}
+                      {mov.client && typeof mov.client == "object"
+                        ? `${mov.client.firstname} ${mov.client.lastname}`
+                        : "Sin Cliente"}
                     </th>
                     <td className="px-6 py-4">
                       {moment(mov.date).format("DD-MM-YYYY")}
@@ -168,6 +197,28 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
                           <path d="M6 4.75A.75.75 0 0 1 6.75 4h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 4.75ZM6 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 10Zm0 5.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75ZM1.99 4.75a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 15.25a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 10a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1V10Z" />
                         </svg>
                       </button>
+                      <button
+                        type="button"
+                        className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-red dark:hover:bg-red-700 dark:focus:ring-red-800"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteId(mov._id);
+                          setDeleteModalOpen(true);
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="size-5"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -179,8 +230,15 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
             modalOpen={methodModalOpen}
             movement={selectedMov}
           />
+          <ModalDelete
+            id="delete-modal"
+            modalOpen={deleteModalOpen}
+            setModalOpen={setDeleteModalOpen}
+            deleteFn={deleteHandler}
+          />
         </div>
       </div>
+      <Toaster position="bottom-right" />
     </div>
   );
 };
