@@ -13,7 +13,7 @@ export class MovementController {
         const startDate = moment(req.query.date, "YYYY/MM/DD");
         const endDate = moment(req.query.date, "YYYY/MM/DD")
           .endOf("day")
-          .add(3, "h");
+          .add(1, "d");
         const filter = {
           ...{ companyCode: companyCode },
           ...(req.query.date
