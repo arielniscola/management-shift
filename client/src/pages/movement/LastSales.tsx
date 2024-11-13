@@ -19,7 +19,8 @@ const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
   useEffect(() => {
     const fetchMovements = async () => {
       try {
-        const date = moment(new Date()).toISOString();
+        const dt = new Date();
+        const date = moment(dt.setHours(dt.getHours() - 3)).toISOString();
         const movementData = (await getMovements(date)) as IMovement[];
         setMovements(movementData);
       } catch (error) {

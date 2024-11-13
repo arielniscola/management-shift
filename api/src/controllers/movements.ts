@@ -10,10 +10,8 @@ export class MovementController {
       const logger = new Log(res.locals.requestId, "MovementController.find");
       try {
         const companyCode = res.locals.companyCode;
-        const startDate = moment(req.query.date, "YYYY/MM/DD");
-        const endDate = moment(req.query.date, "YYYY/MM/DD")
-          .endOf("day")
-          .add(1, "d");
+        const startDate = moment(req.query.date, "YYYY/MM/DD").startOf("day");
+        const endDate = moment(req.query.date, "YYYY/MM/DD").endOf("day");
         const filter = {
           ...{ companyCode: companyCode },
           ...(req.query.date
@@ -39,7 +37,9 @@ export class MovementController {
     try {
       const companyCode = res.locals.companyCode;
       const movement: IMovement = req.body;
-      movement.date = new Date();
+      const date = new Date(); // Fecha actual
+      date.setHours(date.getHours() - 3);
+      movement.date = date;
       movement.companyCode = companyCode;
       if (movement.client === "") delete movement.client;
 
