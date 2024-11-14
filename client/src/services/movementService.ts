@@ -17,6 +17,21 @@ export const getMovements = async (date?: string) => {
     throw error;
   }
 };
+export const getLastsMovements = async () => {
+  try {
+    const res = await fetch(`${URL_API}/movement/lasts`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const response: ResponseApi<IMovement> = await res.json();
+    if (!res.ok && typeof response.data == "string")
+      throw new Error(response.data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const createMovement = async (mov: IMovement) => {
   try {

@@ -1,10 +1,14 @@
 import { FC, useEffect, useState } from "react";
 import ModalPaymentMethod from "../../components/PaymentMethodModal";
 import { IMovement } from "../../interfaces/movement";
-import { getMovements } from "../../services/movementService";
+import {
+  getLastsMovements,
+  getMovements,
+} from "../../services/movementService";
 
 import { IPaymentMethod } from "../../interfaces/paymentMethod";
 import moment from "moment";
+import { CheckCircle, Pencil } from "lucide-react";
 
 interface LastSalesProps {
   editMov: (mov: IMovement) => void;
@@ -19,9 +23,7 @@ const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
   useEffect(() => {
     const fetchMovements = async () => {
       try {
-        const dt = new Date();
-        const date = moment(dt.setHours(dt.getHours() - 3)).toISOString();
-        const movementData = (await getMovements(date)) as IMovement[];
+        const movementData = (await getLastsMovements()) as IMovement[];
         setMovements(movementData);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -50,105 +52,99 @@ const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
         {/* Card content */}
         {/* "Today" group */}
         <div>
-          <header className="text-xs uppercase text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 dark:bg-opacity-50 rounded-sm font-semibold p-2">
-            Hoy
-          </header>
-          <ul className="my-1">
-            {/* Item */}
-            {movements &&
-              movements.map((mov) => (
-                <li className="flex px-2" key={mov._id}>
-                  {mov.state === "paid" ? (
-                    <div className="w-9 h-9 rounded-full shrink-0 bg-emerald-500 my-2 mr-3">
-                      <svg
-                        className="w-9 h-9 fill-current text-emerald-50"
-                        viewBox="0 0 36 36"
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Fecha
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Cliente
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Productos
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {movements &&
+                movements.map((mov) => (
+                  <tr key={mov._id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {new Date(mov.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {mov.client && typeof mov.client == "object"
+                        ? `${mov.client.firstname} ${mov.client.lastname}`
+                        : "Sin cliente"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <ul className="list-disc list-inside">
+                        {mov.details.map((item, index) => (
+                          <li key={index} className="text-sm text-gray-600">
+                            {item.name} x{item.units} (${item.price.toFixed(2)})
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
+                      ${mov.totalAmount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          mov.state === "paid"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
                       >
-                        <path d="M18.3 11.3l-1.4 1.4 4.3 4.3H11v2h10.2l-4.3 4.3 1.4 1.4L25 18z" />
-                      </svg>
-                    </div>
-                  ) : (
-                    <div className="w-9 h-9 rounded-full shrink-0 bg-rose-500 my-2 mr-3">
-                      <svg
-                        className="w-9 h-9 fill-current text-rose-50"
-                        viewBox="0 0 36 36"
-                      >
-                        <path d="M17.7 24.7l1.4-1.4-4.3-4.3H25v-2H14.8l4.3-4.3-1.4-1.4L11 18z" />
-                      </svg>
-                    </div>
-                  )}
-
-                  <div className="grow flex items-center border-b border-slate-100 dark:border-slate-700 text-sm py-2">
-                    <div className="grow flex justify-between">
-                      <div className="self-center">
-                        <span className="font-medium text-slate-800 hover:text-slate-900 dark:text-slate-100 dark:hover:text-white">
-                          {mov.client && typeof mov.client == "object"
-                            ? `${mov.client.firstname} ${mov.client.lastname}`
-                            : "Sin cliente"}
-                        </span>
-                      </div>
-                      <div
-                        className={
+                        {mov.state === "debit" ? "Pendiente" : "Pagado"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedMov(mov);
+                          setMethodModalOpen(true);
+                        }}
+                        className={`${
                           mov.state === "debit"
-                            ? "font-bold text-emerald-500 mt-2"
-                            : "mr-[123px] font-bold text-emerald-500 mt-2"
-                        }
+                            ? "text-green-600 hover:text-green-800"
+                            : "text-yellow-600 hover:text-yellow-800"
+                        }`}
                       >
-                        $ {mov.totalAmount}
-                      </div>
-                      {mov.state === "debit" ? (
-                        <div className="shrink-0 self-end ml-2">
-                          <button
-                            type="button"
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            onClick={() => {
-                              setSelectedMov(mov);
-                              setMov(mov);
-                            }}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="text-white bg-[#34A853] hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-green-green dark:hover:bg-green-700 dark:focus:ring-green-800"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedMov(mov);
-                              setMethodModalOpen(true);
-                            }}
-                          >
-                            Pago
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="shrink-0 self-end ml-2">
-                          <button
-                            type="button"
-                            className="hidden text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            onClick={() => {
-                              setSelectedMov(mov);
-                              setMov(mov);
-                            }}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="hidden text-white bg-[#34A853] hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-green-green dark:hover:bg-green-700 dark:focus:ring-green-800"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMethodModalOpen(true);
-                            }}
-                          >
-                            Pago
-                          </button>
-                        </div>
+                        {mov.state === "debit" ? (
+                          <CheckCircle className="w-5 h-5 inline" />
+                        ) : (
+                          ""
+                        )}
+                      </button>
+                      {mov.state === "debit" && (
+                        <button
+                          onClick={() => {
+                            setSelectedMov(mov);
+                            setMov(mov);
+                          }}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Pencil className="w-5 h-5 inline" />
+                        </button>
                       )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-          </ul>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
         <ModalPaymentMethod
           id="method-modal"

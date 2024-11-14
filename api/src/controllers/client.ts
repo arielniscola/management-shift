@@ -18,7 +18,11 @@ export class ClientController {
         ...{ companyCode: companyCode },
         ...(req.query.id ? { id: req.query.id } : {}),
       };
-      const data: IClient[] = await clientService.find(filter);
+      const data: IClient[] = await clientService.find(
+        filter,
+        {},
+        { sort: { firstname: 1 } }
+      );
 
       return res.status(200).json({ ack: 0, data: data });
     } catch (e) {

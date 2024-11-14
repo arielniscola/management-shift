@@ -99,6 +99,13 @@ const routes = defineRoutes([
         auth: false,
       },
       {
+        path: "/movement/lasts",
+        label: "Ventas",
+        method: "get",
+        controller: MovementController.findLast,
+        auth: false,
+      },
+      {
         path: "/movement",
         label: "Crear Ventas",
         method: "post",
