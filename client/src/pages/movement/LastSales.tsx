@@ -1,13 +1,9 @@
 import { FC, useEffect, useState } from "react";
 import ModalPaymentMethod from "../../components/PaymentMethodModal";
 import { IMovement } from "../../interfaces/movement";
-import {
-  getLastsMovements,
-  getMovements,
-} from "../../services/movementService";
-
+import { getLastsMovements } from "../../services/movementService";
 import { IPaymentMethod } from "../../interfaces/paymentMethod";
-import moment from "moment";
+
 import { CheckCircle, Pencil } from "lucide-react";
 
 interface LastSalesProps {
