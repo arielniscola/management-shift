@@ -12,6 +12,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { IClient } from "../../interfaces/client";
 import { getClients } from "../../services/clientService";
 import FormClientModal from "../../components/formClientModal";
+import SearchableSelect from "../../components/SearchableSelect";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
@@ -98,8 +99,7 @@ const Sales = () => {
     totalCalculate(newArray);
   };
 
-  const clientHandler = (e: ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
+  const clientHandler = (val: string) => {
     setMovement({ ...movement, client: val });
   };
 
@@ -369,24 +369,19 @@ const Sales = () => {
                     >
                       Cliente
                     </label>
-                    <select
-                      id="countries"
-                      className="bg-gray-50 w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      onChange={clientHandler}
+                    <SearchableSelect
+                      options={clients.map((cli) => ({
+                        value: cli._id ? cli._id : cli.firstname,
+                        label: `${cli.firstname} ${cli.lastname}`,
+                      }))}
                       value={
-                        typeof movement.client == "string"
+                        typeof movement.client === "string"
                           ? movement.client
                           : movement.client._id
                       }
-                    >
-                      <option defaultValue="">Seleccionar Cliente</option>
-                      {clients &&
-                        clients.map((cli) => (
-                          <option key={cli._id} value={cli._id}>
-                            {cli.firstname} {cli.lastname}
-                          </option>
-                        ))}
-                    </select>
+                      onChange={clientHandler}
+                      placeholder="Seleccionar a un cliente..."
+                    />
                   </div>
                   <div>
                     <label

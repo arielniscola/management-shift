@@ -11,13 +11,14 @@ import ModalDetailMovements from "../../components/DetailModalMovements";
 import { IPaymentMethod } from "../../interfaces/paymentMethod";
 import { updateMovement } from "../../services/movementService";
 import toast, { Toaster } from "react-hot-toast";
+import SearchableSelect from "../../components/SearchableSelect";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
 const ClientView = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [clients, setClients] = useState<IClient[]>();
+  const [clients, setClients] = useState<IClient[]>([]);
   const [movements, setMovements] = useState<IMovement[]>();
   const [selectedMov, setSelectedMov] = useState<IMovement>();
   const [selectedClient, setSelectedClient] = useState<IClient>();
@@ -54,8 +55,7 @@ const ClientView = () => {
   }, [selectedClient, research]);
 
   //Manejo selector de cliente
-  const handlerSelectClient = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const handlerSelectClient = (value: string) => {
     const cli = clients?.find((cli) => cli._id === value);
     setSelectedClient(cli);
   };
@@ -107,19 +107,15 @@ const ClientView = () => {
                 Clientes
               </h6>
               <div className="grid w-full grid-flow-col gap-4">
-                <select
-                  id="countries"
-                  className="bg-gray-50 w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                <SearchableSelect
+                  options={clients.map((cli) => ({
+                    value: cli._id ? cli._id : cli.firstname,
+                    label: `${cli.firstname} ${cli.lastname}`,
+                  }))}
+                  value={selectedClient?._id || ""}
                   onChange={handlerSelectClient}
-                >
-                  <option defaultValue="">Seleccionar Cliente</option>
-                  {clients &&
-                    clients.map((cli) => (
-                      <option key={cli._id} value={cli._id}>
-                        {cli.firstname} {cli.lastname}
-                      </option>
-                    ))}
-                </select>
+                  placeholder="Seleccionar a un cliente..."
+                />
                 <div>
                   <button
                     type="button"
