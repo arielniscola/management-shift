@@ -377,7 +377,7 @@ const Sales = () => {
                       value={
                         typeof movement.client === "string"
                           ? movement.client
-                          : movement.client._id
+                          : movement.client._id || ""
                       }
                       onChange={clientHandler}
                       placeholder="Seleccionar a un cliente..."
