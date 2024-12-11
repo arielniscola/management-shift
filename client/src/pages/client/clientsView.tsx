@@ -45,8 +45,8 @@ const ClientView = () => {
         const clientsData = (await getMovementsClient(
           selectedClient?._id
         )) as IMovement[];
-        setMovements(clientsData);
         totalDoubt(clientsData);
+        setMovements(clientsData);
       } catch (error) {
         console.error("Error fetching clients:", error);
       }
@@ -61,9 +61,9 @@ const ClientView = () => {
   };
 
   //Calculo total deuda
-  const totalDoubt = (movements: IMovement[]) => {
+  const totalDoubt = (movs: IMovement[]) => {
     let total = 0;
-    for (const mov of movements) {
+    for (const mov of movs) {
       if (mov.state == "debit") total += mov.totalAmount;
     }
     setDoubt(total);

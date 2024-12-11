@@ -118,10 +118,11 @@ const Sales = () => {
       } else {
         notify(res.message ? res.message : "ok");
       }
-      setResearch(!research);
-      cleanForm();
     } catch (error) {
       notifyError(error ? error.toString() : "error");
+    } finally {
+      setResearch(!research);
+      cleanForm();
     }
   };
   // Modifica metodo de pago y estado
