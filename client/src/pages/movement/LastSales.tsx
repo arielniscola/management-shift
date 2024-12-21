@@ -87,13 +87,14 @@ const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
                       <ul className="list-disc list-inside">
                         {mov.details.map((item, index) => (
                           <li key={index} className="text-sm text-gray-600">
-                            {item.name} x{item.units} (${item.price.toFixed(2)})
+                            {item.name} x{item.units} (${item.price?.toFixed(2)}
+                            )
                           </li>
                         ))}
                       </ul>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
-                      ${mov.totalAmount.toFixed(2)}
+                      ${mov.totalAmount?.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span
