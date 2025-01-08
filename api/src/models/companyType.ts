@@ -6,7 +6,7 @@ export interface ICompanyType {
   description: string;
 }
 
-const CompanyTypeSchema = createSchema<ICompanyType>({
+export const CompanyTypeSchema = createSchema<ICompanyType>({
   code: {
     type: String,
     required: true,

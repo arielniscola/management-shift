@@ -12,6 +12,8 @@ import ProductForm from "./pages/Product/Form";
 import Sales from "./pages/movement/Sales";
 import PaymentMethodForm from "./pages/PaymentMethod/form";
 import ClientView from "./pages/client/clientsView";
+import CalendarMenu from "./pages/calendar/CalendarMenu";
+
 function App() {
   const location = useLocation();
 
@@ -36,6 +38,7 @@ function App() {
           element={<PaymentMethodForm />}
         />
         <Route path="/clients" element={<ClientView />} />
+        <Route path="/shift" element={<CalendarMenu />} />
       </Routes>
     </>
   );

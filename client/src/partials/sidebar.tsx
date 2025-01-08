@@ -242,6 +242,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </NavLink>
               </li>
+              {/* Turnos */}
+              <li
+                className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${
+                  pathname.includes("shift") && "bg-slate-900"
+                }`}
+              >
+                <NavLink
+                  end
+                  to="/shift"
+                  className={`block text-slate-200 truncate transition duration-150 ${
+                    pathname.includes("shift")
+                      ? "hover:text-slate-200"
+                      : "hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
+                      <path
+                        className={`fill-current ${
+                          pathname.includes("shift")
+                            ? "text-indigo-500"
+                            : "text-slate-600"
+                        }`}
+                        d="M3 3.5A1.5 1.5 0 0 1 4.5 2h6.879a1.5 1.5 0 0 1 1.06.44l4.122 4.12A1.5 1.5 0 0 1 17 7.622V16.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 16.5v-13ZM13.25 9a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5a.75.75 0 0 1 .75-.75Zm-6.5 4a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-1.5 0v-.5a.75.75 0 0 1 .75-.75Zm4-1.25a.75.75 0 0 0-1.5 0v2.5a.75.75 0 0 0 1.5 0v-2.5Z"
+                      />
+                      <path
+                        className={`fill-current ${
+                          pathname.includes("shift")
+                            ? "text-indigo-300"
+                            : "text-slate-400"
+                        }`}
+                        d="M3 3.5A1.5 1.5 0 0 1 4.5 2h6.879a1.5 1.5 0 0 1 1.06.44l4.122 4.12A1.5 1.5 0 0 1 17 7.622V16.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 16.5v-13ZM13.25 9a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5a.75.75 0 0 1 .75-.75Zm-6.5 4a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-1.5 0v-.5a.75.75 0 0 1 .75-.75Zm4-1.25a.75.75 0 0 0-1.5 0v2.5a.75.75 0 0 0 1.5 0v-2.5Z"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                      Turnos
+                    </span>
+                  </div>
+                </NavLink>
+              </li>
               {/* Clientes */}
               <li
                 className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${

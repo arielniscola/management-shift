@@ -1,16 +1,19 @@
+import { Schema } from "mongoose";
 import { createModel, createSchema } from ".";
-import { ClientSchema, IClient } from "./client";
-import { IUnitBusiness } from "./unitBusiness";
+import { IClient } from "./client";
 
 export interface IShift {
+  _id?: string;
   companyCode: string;
   date: Date;
-  time: string;
-  state: string;
+  timeStart: string;
+  timeEnd: string;
+  status: string;
   notificated: boolean;
   description: string;
-  client: IClient;
+  client: string | IClient;
   unitBusiness: string;
+  permanent: boolean;
 }
 
 export const ShiftSchema = createSchema<IShift>({
@@ -22,11 +25,15 @@ export const ShiftSchema = createSchema<IShift>({
     type: Date,
     required: true,
   },
-  time: {
+  timeStart: {
     type: String,
     required: true,
   },
-  state: {
+  timeEnd: {
+    type: String,
+    required: true,
+  },
+  status: {
     type: String,
     required: true,
   },
@@ -36,12 +43,18 @@ export const ShiftSchema = createSchema<IShift>({
     default: false,
   },
   client: {
-    type: ClientSchema,
+    type: Schema.Types.ObjectId,
+    ref: "client",
     required: false,
   },
   unitBusiness: {
     type: String,
     required: true,
+  },
+  permanent: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
 });
 

@@ -4,6 +4,8 @@ import { PaymentMethodController } from "./controllers/paymentMethod";
 import { MovementController } from "./controllers/movements";
 import { DailyBalanceController } from "./controllers/dailyBalance";
 import { ClientController } from "./controllers/client";
+import { CompanyController } from "./controllers/company";
+import { ShiftController } from "./controllers/shift";
 
 /**
  * Declaracion de Rutas.
@@ -168,6 +170,36 @@ const routes = defineRoutes([
         label: "Movimientos cliente",
         method: "get",
         controller: ClientController.getMovementClient,
+        auth: false,
+      },
+      // Compañias
+      {
+        path: "/company",
+        label: "Compañia",
+        method: "post",
+        controller: CompanyController.create,
+        auth: false,
+      },
+      // Turnos
+      {
+        path: "/shifts",
+        label: "Turnos",
+        method: "post",
+        controller: ShiftController.create,
+        auth: false,
+      },
+      {
+        path: "/shifts",
+        label: "Turnos",
+        method: "get",
+        controller: ShiftController.find,
+        auth: false,
+      },
+      {
+        path: "/shifts",
+        label: "Turnos",
+        method: "put",
+        controller: ShiftController.update,
         auth: false,
       },
     ],

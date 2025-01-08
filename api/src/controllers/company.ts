@@ -28,8 +28,8 @@ export class CompanyController {
       const companyCode = res.locals.companyCode;
       const company: ICompany = req.body;
 
-      const valid = await companyService.validate(company);
-      if (valid.errors) throw valid.message;
+      // const valid = await companyService.validate(company);
+      // if (valid.errors) throw valid.message;
 
       const created = await companyService.insertOne(company);
 

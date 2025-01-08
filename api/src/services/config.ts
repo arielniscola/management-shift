@@ -3,7 +3,7 @@ import { Filter, Options, Service, Update, Document } from ".";
 import Log from "../libs/logger";
 import { ConfigModel, IConfig } from "../models/config";
 import { ShifManagement } from "..";
-import { DEFAULT_GLOBAL_SETTINGS } from "../constants/globalConfig";
+import { DEFAULT_GLOBAL_SETTINGS } from "../constants/globalConfigs";
 import {
   FilterQuery,
   Types,
