@@ -50,6 +50,7 @@ export class ShiftController {
       const companyCode = res.locals.companyCode;
       const shift: IShift = req.body;
       shift.companyCode = companyCode;
+      delete shift._id;
       const isValid = await shiftService.validate(shift);
       if (isValid) throw new Error(isValid.message);
       const created = await shiftService.insertOne(shift);

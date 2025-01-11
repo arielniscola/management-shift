@@ -1,8 +1,15 @@
 import React, { useState, useRef } from "react";
 import { format, startOfWeek, addDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { Clock, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import type { IShift } from "../../interfaces/shift";
+import { IUnitBusiness } from "../../interfaces/unitBusiness";
+import toast, { Toaster } from "react-hot-toast";
+import ModalDelete from "../../components/DeleteModal";
+import { deleteShift } from "../../services/shiftService";
+
+const notify = (msg: string) => toast.success(msg);
+const notifyError = (msg: string) => toast.error(msg);
 
 interface CalendarProps {
   shifts: IShift[];
@@ -10,6 +17,9 @@ interface CalendarProps {
   onEditShift: (shift: IShift) => void;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  selectedUN: IUnitBusiness | undefined;
+  setSelectedUN: (unit: IUnitBusiness | undefined) => void;
+  unitBusiness: IUnitBusiness[];
   onUpdateShift: (
     shiftId: string,
     date: string,
@@ -21,19 +31,19 @@ interface CalendarProps {
 const getColorStatus = (status: string) => {
   switch (status) {
     case "paid":
-      return "#16a34a";
+      return "#10B981	";
     case "confirmed":
-      return "#2563eb";
+      return "#3B82F6	";
     case "debt":
-      return "#dc2626";
+      return "#EF4444";
     default:
-      return "#d3c902";
+      return "#FBBF24	";
   }
 };
 
 // Calcular slots de tiempo
 const TIME_SLOTS = Array.from(
-  { length: 12 },
+  { length: 16 },
   (_, i) => `${String(i + 9).padStart(2, "0")}:00`
 );
 
@@ -44,19 +54,24 @@ export default function Calendar({
   selectedDate,
   onDateChange,
   onUpdateShift,
+  selectedUN,
+  setSelectedUN,
+  unitBusiness,
 }: CalendarProps) {
   const startDate = startOfWeek(selectedDate);
   const dragRef = useRef<{
     shiftId: string;
     startY: number;
     originalTop: number;
+    startX: number;
     type: "move" | "resize";
   } | null>(null);
   const [dragPreview, setDragPreview] = useState<{
     top: number;
     height: number;
   } | null>(null);
-
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(startDate, i + 1);
     return format(date, "yyyy-MM-dd", { locale: es });
@@ -105,6 +120,7 @@ export default function Calendar({
       shiftId,
       startY: e.clientY,
       originalTop: currentTop,
+      startX: e.clientX,
       type,
     };
 
@@ -158,7 +174,19 @@ export default function Calendar({
   const handleNextWeek = () => {
     onDateChange(addDays(selectedDate, 7));
   };
-
+  const deleteHandler = async () => {
+    try {
+      const res = await deleteShift(deleteId);
+      if (res.ack) {
+        notifyError(res.message ? res.message : "error");
+      } else {
+        notify(res.message ? res.message : "ok");
+      }
+      setDeleteModalOpen(false);
+    } catch (error) {
+      notifyError(error ? error.toString() : "error");
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -181,6 +209,19 @@ export default function Calendar({
           >
             <ChevronRight className="w-5 h-5" />
           </button>
+          <select
+            value={selectedUN?.code}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500r"
+            onChange={(e) =>
+              setSelectedUN(unitBusiness.find((u) => u.code === e.target.value))
+            }
+          >
+            {unitBusiness.map((unit) => (
+              <option key={unit.code} value={unit.code}>
+                {unit.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="text-sm text-gray-600">
           Semana del{" "}
@@ -203,7 +244,7 @@ export default function Calendar({
           ))}
         </div>
 
-        <div className="relative grid grid-cols-[60px_repeat(7,1fr)] h-[1440px] overflow-y-auto">
+        <div className="relative grid grid-cols-[60px_repeat(7,1fr)] overflow-y-auto">
           <div className="border-r border-gray-200">
             {TIME_SLOTS.map((time) => (
               <div
@@ -238,7 +279,7 @@ export default function Calendar({
               ))}
 
               {/* Current time indicator */}
-              {format(new Date(), "yyyy-MM-dd") === date && (
+              {/* {format(new Date(), "yyyy-MM-dd") === date && (
                 <div
                   className="absolute left-0 right-0 h-0.5 bg-red-500 z-10"
                   style={{
@@ -247,7 +288,7 @@ export default function Calendar({
                     }px`,
                   }}
                 />
-              )}
+              )} */}
 
               {/* Shifts */}
               {getShiftsForDate(date).map((shift: IShift) => {
@@ -288,13 +329,19 @@ export default function Calendar({
                             ? `${shift.client.firstname} ${shift.client.lastname}`
                             : ""}
                         </div>
-                        <GripVertical className="w-4 h-4 text-white/70" />
+                        <Trash2
+                          className="w-4 h-4 text-white/70 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteId(shift._id);
+                            setDeleteModalOpen(true);
+                          }}
+                        />
                       </div>
                       <div className="flex items-center gap-1 text-white/90 text-xs">
                         <Clock className="w-3 h-3" />
                         {shift.timeStart} - {shift.timeEnd}
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize bg-black/10 hover:bg-black/20" />
                     </div>
                   </div>
                 );
@@ -302,6 +349,13 @@ export default function Calendar({
             </div>
           ))}
         </div>
+        <ModalDelete
+          id="delete-modal"
+          modalOpen={deleteModalOpen}
+          setModalOpen={setDeleteModalOpen}
+          deleteFn={deleteHandler}
+        />
+        <Toaster position="bottom-right" />
       </div>
     </div>
   );

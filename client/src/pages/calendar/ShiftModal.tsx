@@ -3,7 +3,6 @@ import { X } from "lucide-react";
 import type { IShift } from "../../interfaces/shift";
 import { IClient } from "../../interfaces/client";
 import SearchableSelect from "../../components/SearchableSelect";
-
 interface ShiftModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,6 +11,7 @@ interface ShiftModalProps {
   date: string;
   time: string;
   clients: IClient[];
+  selectedUnitBusiness: string | undefined;
 }
 
 const addDurationshift = (time: string) => {
@@ -38,6 +38,7 @@ export default function ShiftModal({
   date,
   time,
   clients,
+  selectedUnitBusiness,
 }: ShiftModalProps) {
   const [formData, setFormData] = useState({
     _id: initialShift?._id || "",
@@ -45,7 +46,7 @@ export default function ShiftModal({
     timeStart: initialShift?.timeStart || time,
     timeEnd: initialShift?.timeEnd || time,
     status: initialShift?.status || "toConfirm",
-    unitBusiness: initialShift?.unitBusiness || "cancha2",
+    unitBusiness: initialShift?.unitBusiness || selectedUnitBusiness,
     date: initialShift?.date || date,
   });
 
@@ -53,7 +54,7 @@ export default function ShiftModal({
     setFormData({
       _id: initialShift?._id || "",
       client: initialShift?.client || "",
-      unitBusiness: initialShift?.unitBusiness || "cancha2",
+      unitBusiness: initialShift?.unitBusiness || selectedUnitBusiness,
       status: initialShift?.status || "toConfirm",
       timeStart: initialShift?.timeStart || time,
       timeEnd: initialShift?.timeEnd || addDurationshift(time),

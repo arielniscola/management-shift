@@ -15,8 +15,8 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
 import UpdateModalConfirm from "../../components/updateModalConfirm";
-import { set } from "date-fns";
-
+import { IUnitBusiness } from "../../interfaces/unitBusiness";
+import { getUnitBusiness } from "../../services/unitBusinessService";
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
@@ -32,6 +32,9 @@ function CalendarMenu() {
   const [researchShifts, setResearchShifts] = useState<boolean>(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [selectDragShift, setSelectDragShift] = useState<IShift>();
+  const [unitBusiness, setUnitBusiness] = useState<IUnitBusiness[]>([]);
+  const [selectedUnitBusiness, setSelectedUnitBusiness] =
+    useState<IUnitBusiness>();
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -42,7 +45,19 @@ function CalendarMenu() {
         console.error("Error fetching clients:", error);
       }
     };
+    const fetchUnitBusiness = async () => {
+      try {
+        const unitBusinessData = (await getUnitBusiness(
+          true
+        )) as IUnitBusiness[];
+        setUnitBusiness(unitBusinessData);
+        setSelectedUnitBusiness(unitBusinessData[0]);
+      } catch (error) {
+        console.error("Error fetching unit business:", error);
+      }
+    };
     fetchClients();
+    fetchUnitBusiness();
   }, []);
   useEffect(() => {
     const fetchShifts = async () => {
@@ -51,7 +66,7 @@ function CalendarMenu() {
           selectedDate
             ? selectedDate
             : moment(currentDate).format("YYYY-MM-DD"),
-          "cancha2"
+          selectedUnitBusiness?.code
         )) as IShift[];
         setShifts(clientsData);
       } catch (error) {
@@ -59,7 +74,7 @@ function CalendarMenu() {
       }
     };
     fetchShifts();
-  }, [researchShifts]);
+  }, [researchShifts, selectedUnitBusiness]);
 
   const handleAddShift = (date: string, time: string) => {
     setSelectedStartTime(time);
@@ -155,6 +170,9 @@ function CalendarMenu() {
                 selectedDate={currentDate}
                 onDateChange={setCurrentDate}
                 onUpdateShift={handleUpdateShift}
+                selectedUN={selectedUnitBusiness}
+                setSelectedUN={setSelectedUnitBusiness}
+                unitBusiness={unitBusiness}
               />
 
               <ShiftModal
@@ -165,6 +183,7 @@ function CalendarMenu() {
                 date={selectedDate}
                 time={selectedStartTime}
                 clients={clients}
+                selectedUnitBusiness={selectedUnitBusiness?.code}
               />
 
               <UpdateModalConfirm

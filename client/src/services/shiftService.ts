@@ -3,7 +3,7 @@ import { ResponseApi } from "../interfaces/responseApi";
 import { IShift } from "../interfaces/shift";
 import { URL_API } from "./constants";
 
-export const getShifts = async (date: string, unitBusiness: string) => {
+export const getShifts = async (date: string, unitBusiness?: string) => {
   try {
     /** Configurar fecha como principio de semana */
     const newDate = new Date(date);
