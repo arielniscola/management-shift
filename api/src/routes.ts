@@ -4,6 +4,9 @@ import { PaymentMethodController } from "./controllers/paymentMethod";
 import { MovementController } from "./controllers/movements";
 import { DailyBalanceController } from "./controllers/dailyBalance";
 import { ClientController } from "./controllers/client";
+import { CompanyController } from "./controllers/company";
+import { ShiftController } from "./controllers/shift";
+import { UnitBusinessController } from "./controllers/unitBusiness";
 
 /**
  * Declaracion de Rutas.
@@ -168,6 +171,72 @@ const routes = defineRoutes([
         label: "Movimientos cliente",
         method: "get",
         controller: ClientController.getMovementClient,
+        auth: false,
+      },
+      // Compañias
+      {
+        path: "/company",
+        label: "Compañia",
+        method: "post",
+        controller: CompanyController.create,
+        auth: false,
+      },
+      // Turnos
+      {
+        path: "/shifts",
+        label: "Turnos",
+        method: "post",
+        controller: ShiftController.create,
+        auth: false,
+      },
+      {
+        path: "/shifts",
+        label: "Turnos",
+        method: "get",
+        controller: ShiftController.find,
+        auth: false,
+      },
+      {
+        path: "/shifts",
+        label: "Turnos",
+        method: "put",
+        controller: ShiftController.update,
+        auth: false,
+      },
+      {
+        path: "/shifts/:id",
+        label: "Turnos",
+        method: "delete",
+        controller: ShiftController.delete,
+        auth: false,
+      },
+      // Unidad de negocios
+      {
+        path: "/unitBusiness",
+        label: "Turnos",
+        method: "post",
+        controller: UnitBusinessController.create,
+        auth: false,
+      },
+      {
+        path: "/unitBusiness",
+        label: "Unidad de Negocio",
+        method: "get",
+        controller: UnitBusinessController.find,
+        auth: false,
+      },
+      {
+        path: "/unitBusiness",
+        label: "Unidad de Negocio",
+        method: "put",
+        controller: UnitBusinessController.update,
+        auth: false,
+      },
+      {
+        path: "/unitBusiness/:id",
+        label: "Unidad de Negocio",
+        method: "delete",
+        controller: UnitBusinessController.delete,
         auth: false,
       },
     ],

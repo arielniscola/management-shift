@@ -1,86 +1,92 @@
 import { ChangeEvent, useEffect, useState } from "react";
+import { Pencil, Trash2, Search, Store } from "lucide-react";
 import { Sidebar } from "../../partials/sidebar";
 import Header from "../../partials/headers";
-import { IProduct } from "../../interfaces/producto";
+import { IUnitBusiness } from "../../interfaces/unitBusiness";
 import {
-  createProduct,
-  deleteProduct,
-  getProducts,
-  updateProduct,
-} from "../../services/productService";
+  createUnitBusiness,
+  deleteUnitBusiness,
+  getUnitBusiness,
+  updateUnitBusiness,
+} from "../../services/unitBusinessService";
 import ModalDelete from "../../components/DeleteModal";
 import toast, { Toaster } from "react-hot-toast";
-import { PackageSearch, Pencil, Search, Trash2 } from "lucide-react";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
-const Product = () => {
+const UnitBusiness = () => {
+  const [unitBusiness, setUnitBusiness] = useState<IUnitBusiness[]>([]);
+  const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [filter, setFilter] = useState("");
+  const [filterData, setFilterData] = useState<IUnitBusiness[]>([]);
+  const [research, setResearch] = useState<boolean>(true);
+  const [formData, setFormData] = useState<IUnitBusiness>({
+    _id: "",
+    code: "",
+    name: "",
+    description: "",
+    active: true,
+  });
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string>("");
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [filter, setFilter] = useState("");
-  const [filterData, setFilterData] = useState<IProduct[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const [research, setResearch] = useState<boolean>(true);
-  const [formData, setFormData] = useState<IProduct>({
-    _id: "",
-    name: "",
-    price: 0,
-    code: "",
-    stock: "",
-    description: "",
-    units: 0,
-  });
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchUnitBusiness = async () => {
       try {
-        const productsData = (await getProducts()) as IProduct[];
-        setProducts(productsData);
+        const data = (await getUnitBusiness(false)) as IUnitBusiness[];
+        setUnitBusiness(data);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching unit business:", error);
       }
     };
-    fetchProducts();
+    fetchUnitBusiness();
   }, [research]);
 
   useEffect(() => {
     if (showModal === false) {
       setFormData({
         _id: "",
-        name: "",
-        price: 0,
         code: "",
-        stock: "",
+        name: "",
         description: "",
-        units: 0,
+        active: true,
       });
     }
   }, [showModal]);
 
   const handleUpdate = (id?: string) => {
-    const unit = products.find((u) => u._id === id);
+    const unit = unitBusiness.find((u) => u._id === id);
     if (unit) {
       setFormData(unit);
       setShowModal(true);
     }
   };
-  const filterHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFilter(value);
-    const newProdArray = products.filter(
-      (prod) =>
-        prod.name?.toLocaleLowerCase().includes(value) ||
-        prod.code?.toLocaleLowerCase().includes(value)
-    );
-    setFilterData(newProdArray);
+
+  const handleAddUnitBusiness = async () => {
+    try {
+      let res;
+      !formData._id
+        ? (res = await createUnitBusiness(formData))
+        : (res = await updateUnitBusiness(formData));
+
+      if (!res.ack) {
+        notify(res.message ? res.message : "ok");
+      } else {
+        notifyError(res.message ? res.message : "Error");
+      }
+    } catch (error) {
+      notifyError(error ? error.toString() : "Error");
+    } finally {
+      setShowModal(false);
+      setResearch(!research);
+    }
   };
 
   const deleteHandler = async () => {
     try {
-      const res = await deleteProduct(deleteId);
+      const res = await deleteUnitBusiness(deleteId);
       if (res.ack) {
         notifyError(res.message ? res.message : "error");
       } else {
@@ -92,25 +98,16 @@ const Product = () => {
       notifyError(error ? error.toString() : "error");
     }
   };
-  const handleAddProduct = async () => {
-    try {
-      let res;
-      if (!formData._id) {
-        res = await createProduct(formData);
-      } else {
-        res = await updateProduct(formData);
-      }
-      if (!res.ack) {
-        notify(res.message ? res.message : "ok");
-      } else {
-        notifyError(res.message ? res.message : "Error");
-      }
-    } catch (error) {
-      notifyError(error ? error.toString() : "Error");
-    } finally {
-      setResearch(!research);
-      setShowModal(false);
-    }
+
+  const filterHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFilter(value);
+    const newUNArray = unitBusiness.filter(
+      (met) =>
+        met.name?.toLocaleLowerCase().includes(value) ||
+        met.code?.toLocaleLowerCase().includes(value)
+    );
+    setFilterData(newUNArray);
   };
 
   return (
@@ -125,12 +122,14 @@ const Product = () => {
           <div className="min-h-screen bg-gray-100 p-8">
             <div className="mx-auto">
               <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Productos</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Unidad de Negocio
+                </h1>
                 <button
                   onClick={() => setShowModal(true)}
                   className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 transition-colors"
                 >
-                  <PackageSearch className="h-5 w-5" />
+                  <Store className="h-5 w-5" />
                   Nuevo
                 </button>
               </div>
@@ -142,7 +141,7 @@ const Product = () => {
                   </div>
                   <input
                     type="text"
-                    placeholder="Filtrar productos..."
+                    placeholder="Filtrar unidad de negocio..."
                     value={filter}
                     onChange={(e) => filterHandler(e)}
                     className="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400"
@@ -155,16 +154,16 @@ const Product = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nombre
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Codigo
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Precio
+                        Nombre
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Stock
+                        Estado
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Descripcion
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Acciones
@@ -173,32 +172,38 @@ const Product = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filter.length === 0
-                      ? products.map((prod) => (
-                          <tr key={prod._id} className="hover:bg-gray-50">
+                      ? unitBusiness.map((unit) => (
+                          <tr key={unit._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                {prod.name}
+                              <div className="text-sm font-medium text-gray-900">
+                                {unit.code}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-500">
-                                {prod.code}
+                                {unit.name}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                $ {prod.price}
-                              </div>
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${
+                                  unit.active ? "green" : "red"
+                                }-100 text-${
+                                  unit.active ? "green" : "red"
+                                }-800`}
+                              >
+                                {unit.active === true ? "Activo" : "Inactivo"}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                {prod.stock}
+                              <div className="text-sm text-gray-500">
+                                {unit.description}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-3">
                                 <button
-                                  onClick={() => handleUpdate(prod._id)}
+                                  onClick={() => handleUpdate(unit._id)}
                                   className="text-indigo-600 hover:text-indigo-900 transition-colors"
                                 >
                                   <Pencil className="h-5 w-5" />
@@ -206,7 +211,7 @@ const Product = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setDeleteId(prod._id ? prod._id : "");
+                                    setDeleteId(unit._id ? unit._id : "");
                                     setDeleteModalOpen(true);
                                   }}
                                   className="text-red-600 hover:text-red-900 transition-colors"
@@ -217,32 +222,38 @@ const Product = () => {
                             </td>
                           </tr>
                         ))
-                      : filterData.map((prod) => (
-                          <tr key={prod._id} className="hover:bg-gray-50">
+                      : filterData.map((unit) => (
+                          <tr key={unit._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                {prod.name}
+                              <div className="text-sm font-medium text-gray-900">
+                                {unit.code}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-500">
-                                {prod.code}
+                                {unit.name}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                $ {prod.price}
-                              </div>
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${
+                                  unit.active ? "green" : "red"
+                                }-100 text-${
+                                  unit.active ? "green" : "red"
+                                }-800`}
+                              >
+                                {unit.active === true ? "Activo" : "Inactivo"}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-500">
-                                {prod.stock}
+                                {unit.description}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-3">
                                 <button
-                                  onClick={() => handleUpdate(prod._id)}
+                                  onClick={() => handleUpdate(unit._id)}
                                   className="text-indigo-600 hover:text-indigo-900 transition-colors"
                                 >
                                   <Pencil className="h-5 w-5" />
@@ -250,7 +261,7 @@ const Product = () => {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setDeleteId(prod._id ? prod._id : "");
+                                    setDeleteId(unit._id ? unit._id : "");
                                     setDeleteModalOpen(true);
                                   }}
                                   className="text-red-600 hover:text-red-900 transition-colors"
@@ -269,7 +280,7 @@ const Product = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                   <div className="bg-white rounded-lg p-8 max-w-md w-full">
                     <h2 className="text-2xl font-bold mb-4">
-                      Agregar Producto
+                      Agregar Unidad de Negocio
                     </h2>
                     <div className="space-y-4">
                       <div>
@@ -288,34 +299,14 @@ const Product = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          Codigo
+                          Código
                         </label>
                         <input
                           type="text"
                           required
                           value={formData.code}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              code: e.target.value,
-                            })
-                          }
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Price
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          value={formData.price}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              price: parseFloat(e.target.value),
-                            })
+                            setFormData({ ...formData, code: e.target.value })
                           }
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
                         />
@@ -339,20 +330,21 @@ const Product = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          Stock
+                          Estado
                         </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.stock}
+                        <select
+                          value={formData.active.valueOf().toString()}
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              stock: e.target.value,
+                              active: e.target.value === "true",
                             })
                           }
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
-                        />
+                        >
+                          <option value={"true"}>Activo</option>
+                          <option value={"false"}>Inactivo</option>
+                        </select>
                       </div>
                       <div className="flex justify-end space-x-3">
                         <button
@@ -365,7 +357,7 @@ const Product = () => {
                         <button
                           type="button"
                           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                          onClick={handleAddProduct}
+                          onClick={handleAddUnitBusiness}
                         >
                           Guardar
                         </button>
@@ -389,4 +381,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default UnitBusiness;

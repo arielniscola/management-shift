@@ -42,6 +42,4 @@ const CompanySchema = createSchema<ICompany>({
   },
 });
 
-CompanySchema.index({ code: 1 }, { unique: true });
-
 export const CompanyModel = createModel("company", CompanySchema);

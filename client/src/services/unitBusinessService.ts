@@ -1,16 +1,15 @@
-import { IClient } from "../interfaces/client";
-import { IMovement } from "../interfaces/movement";
 import { ResponseApi } from "../interfaces/responseApi";
+import { IUnitBusiness } from "../interfaces/unitBusiness";
 import { URL_API } from "./constants";
 
-export const getClients = async () => {
+export const getUnitBusiness = async (active: boolean) => {
   try {
-    const res = await fetch(`${URL_API}/clients?`, {
+    const res = await fetch(`${URL_API}/unitBusiness?active=${active}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
 
-    const response: ResponseApi<IClient> = await res.json();
+    const response: ResponseApi<IUnitBusiness> = await res.json();
     if (!res.ok && typeof response.data == "string")
       throw new Error(response.data);
     return response.data;
@@ -19,12 +18,14 @@ export const getClients = async () => {
   }
 };
 
-export const createClient = async (client: IClient) => {
+export const createUnitBusiness = async (
+  unitBusiness: Omit<IUnitBusiness, "_id">
+) => {
   try {
-    const res = await fetch(`${URL_API}/clients`, {
+    const res = await fetch(`${URL_API}/unitBusiness`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
+      body: JSON.stringify(unitBusiness),
     });
     const response: ResponseApi<String> = await res.json();
     if (!res.ok && typeof response.data == "string")
@@ -35,12 +36,14 @@ export const createClient = async (client: IClient) => {
   }
 };
 
-export const updateClient = async (client: IClient) => {
+export const updateUnitBusiness = async (
+  unitBusiness: Partial<IUnitBusiness>
+) => {
   try {
-    const res = await fetch(`${URL_API}/clients`, {
+    const res = await fetch(`${URL_API}/unitBusiness`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
+      body: JSON.stringify(unitBusiness),
     });
     const response: ResponseApi<String> = await res.json();
     if (!res.ok && typeof response.data == "string")
@@ -50,24 +53,9 @@ export const updateClient = async (client: IClient) => {
     throw error;
   }
 };
-
-export const getMovementsClient = async (id: string = "") => {
+export const deleteUnitBusiness = async (id: string = "") => {
   try {
-    const res = await fetch(`${URL_API}/clients/${id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const response: ResponseApi<IMovement> = await res.json();
-    if (!res.ok && typeof response.data == "string")
-      throw new Error(response.data);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-export const deleteClient = async (id: string = "") => {
-  try {
-    const res = await fetch(`${URL_API}/clients/${id}`, {
+    const res = await fetch(`${URL_API}/unitBusiness/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });

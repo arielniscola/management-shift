@@ -24,6 +24,15 @@ export class ClientController {
         { sort: { firstname: 1 } }
       );
 
+      for (const c of data) {
+        const movement = await movementService.findOne(
+          { client: c._id, companyCode: companyCode, state: "debit" },
+          {},
+          { sort: { date: -1 } }
+        );
+        if (movement) c.debt = true;
+      }
+
       return res.status(200).json({ ack: 0, data: data });
     } catch (e) {
       logger.error(e);
@@ -36,6 +45,7 @@ export class ClientController {
     try {
       const companyCode = res.locals.companyCode;
       const client: IClient = req.body;
+      delete client._id;
       client.companyCode = companyCode;
       const created = await clientService.insertOne(client);
       if (!created) throw new Error("No se creo el cliente");

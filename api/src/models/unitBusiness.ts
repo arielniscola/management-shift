@@ -1,14 +1,12 @@
-import { createSchema } from ".";
+import { createModel, createSchema } from ".";
 
 export interface IUnitBusiness {
+  _id?: string;
   companyCode: string;
   description: string;
   code: string;
   name: string;
-  timetableStart: string;
-  timetableEnd: string;
-  shiftDuration: string;
-  waitingTime: string;
+  active: boolean;
 }
 
 export const UnitBusinessSchema = createSchema<IUnitBusiness>({
@@ -28,4 +26,14 @@ export const UnitBusinessSchema = createSchema<IUnitBusiness>({
     type: String,
     required: false,
   },
+  active: {
+    type: Boolean,
+    required: true,
+    default: true,
+  },
 });
+
+export const UnitBusinessModel = createModel(
+  "unitBusiness",
+  UnitBusinessSchema
+);

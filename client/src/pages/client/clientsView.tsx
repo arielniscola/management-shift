@@ -1,17 +1,32 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Sidebar } from "../../partials/sidebar";
 import Header from "../../partials/headers";
-import moment from "moment";
 import { IClient } from "../../interfaces/client";
-import { getClients, getMovementsClient } from "../../services/clientService";
+import {
+  createClient,
+  deleteClient,
+  getClients,
+  getMovementsClient,
+  updateClient,
+} from "../../services/clientService";
 import { IMovement } from "../../interfaces/movement";
 import ModalPaymentMethod from "../../components/PaymentMethodModal";
 import FormClientModal from "../../components/formClientModal";
 import ModalDetailMovements from "../../components/DetailModalMovements";
 import { IPaymentMethod } from "../../interfaces/paymentMethod";
-import { updateMovement } from "../../services/movementService";
+import { deleteMovement, updateMovement } from "../../services/movementService";
 import toast, { Toaster } from "react-hot-toast";
-import SearchableSelect from "../../components/SearchableSelect";
+import {
+  CreditCard,
+  DollarSign,
+  Pencil,
+  Search,
+  SquareMenu,
+  Trash2,
+  UserPlus,
+  X,
+} from "lucide-react";
+import ModalDelete from "../../components/DeleteModal";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
@@ -27,6 +42,24 @@ const ClientView = () => {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [doubt, setDoubt] = useState<number>();
   const [research, setResearch] = useState<boolean>(false);
+  const [formData, setFormData] = useState<IClient>({
+    _id: "",
+    firstname: "",
+    lastname: "",
+    email: "",
+    phonenumber: "",
+    address: "",
+    identificationNumber: "",
+    companyCode: "",
+  });
+  const [showModal, setShowModal] = useState(false);
+  const [filterData, setFilterData] = useState<IClient[]>([]);
+  const [filter, setFilter] = useState<string>("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<{ id: string; type: string }>({
+    id: "",
+    type: "",
+  });
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -54,6 +87,21 @@ const ClientView = () => {
     fetchmovs();
   }, [selectedClient, research]);
 
+  useEffect(() => {
+    if (showModal === false) {
+      setFormData({
+        _id: "",
+        firstname: "",
+        lastname: "",
+        email: "",
+        phonenumber: "",
+        address: "",
+        identificationNumber: "",
+        companyCode: "",
+      });
+    }
+  }, [showModal]);
+
   //Manejo selector de cliente
   const handlerSelectClient = (value: string) => {
     const cli = clients?.find((cli) => cli._id === value);
@@ -77,6 +125,14 @@ const ClientView = () => {
     }
   };
 
+  const handleUpdate = (id?: string) => {
+    const client = clients.find((u) => u._id === id);
+    if (client) {
+      setFormData(client);
+      setShowModal(true);
+    }
+  };
+
   // Guardar pago
   const submitMovement = async (mov: IMovement) => {
     try {
@@ -92,6 +148,58 @@ const ClientView = () => {
     }
   };
 
+  const filterHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFilter(value);
+    const newUNArray = clients.filter(
+      (client) =>
+        client.firstname
+          ?.toLocaleLowerCase()
+          .includes(value.toLocaleLowerCase()) ||
+        client.lastname?.toLocaleLowerCase().includes(value.toLocaleLowerCase())
+    );
+    setFilterData(newUNArray);
+  };
+
+  const deleteHandler = async () => {
+    try {
+      let res;
+      res =
+        deleteId.type === "movements"
+          ? await deleteMovement(deleteId.id)
+          : await deleteClient(deleteId.id);
+      if (res.ack) {
+        notifyError(res.message ? res.message : "error");
+      } else {
+        notify(res.message ? res.message : "ok");
+      }
+      setDeleteModalOpen(false);
+      setResearch(!research);
+    } catch (error) {
+      notifyError(error ? error.toString() : "error");
+    }
+  };
+
+  const handleAddClient = async () => {
+    try {
+      let res;
+      !formData._id
+        ? (res = await createClient(formData))
+        : (res = await updateClient(formData));
+
+      if (!res.ack) {
+        notify(res.message ? res.message : "ok");
+      } else {
+        notifyError(res.message ? res.message : "Error");
+      }
+    } catch (error) {
+      notifyError(error ? error.toString() : "Error");
+    } finally {
+      setShowModal(false);
+      setResearch(!research);
+    }
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -101,213 +209,455 @@ const ClientView = () => {
         {/*  Site header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <main>
-          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-            <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-              <h6 className="mb-4 text-4xl font-semibold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white">
-                Clientes
-              </h6>
-              <div className="grid w-full grid-flow-col gap-4">
-                <SearchableSelect
-                  options={clients.map((cli) => ({
-                    value: cli._id ? cli._id : cli.firstname,
-                    label: `${cli.firstname} ${cli.lastname}`,
-                  }))}
-                  value={selectedClient?._id || ""}
-                  onChange={handlerSelectClient}
-                  placeholder="Seleccionar a un cliente..."
-                />
-                <div>
+          <div className="bg-gray-100 p-8">
+            <div className="mx-auto">
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Gestión Clientes
+                </h1>
+                <div className="flex gap-4">
                   <button
-                    type="button"
-                    className="text-[#34A853] w-12 border border-[#34A853] hover:bg-[#34A853] hover:text-white focus:ring-4 focus:outline-none focus:ring-greeb-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:focus:ring-blue-800 dark:hover:bg-green-500"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFormModalOpen(true);
-                    }}
+                    onClick={() => setShowModal(true)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 transition-colors"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 18 18"
-                    >
-                      {selectedClient ? (
-                        // Icono de edición cuando hay un cliente seleccionado
-                        <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
-                      ) : (
-                        // Icono de "+" cuando no hay un cliente seleccionado
-                        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                      )}
-                    </svg>
+                    <UserPlus className="h-5 w-5" />
+                    Nuevo
                   </button>
                 </div>
               </div>
-
-              {selectedClient && (
-                <div>
-                  {" "}
-                  <div className="grid w-full grid-flow-col gap-4 m-5">
-                    <dl className="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
-                      <div className="flex flex-col pb-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          Nombre
-                        </dt>
-                        <dd className="text-lg font-semibold">
-                          {selectedClient?.firstname}
-                        </dd>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                  <div className="mb-4 flex gap-4">
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-gray-400" />
                       </div>
-                      <div className="flex flex-col py-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          Apellido
-                        </dt>
-                        <dd className="text-lg font-semibold">
-                          {selectedClient?.lastname}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col pt-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          Telefono
-                        </dt>
-                        <dd className="text-lg font-semibold">
-                          {selectedClient?.phonenumber}
-                        </dd>
-                      </div>
-                    </dl>
-                    <dl className="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
-                      <div className="flex flex-col pb-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          Direccion
-                        </dt>
-                        <dd className="text-lg font-semibold">
-                          {selectedClient?.address}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col py-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          DNI
-                        </dt>
-                        <dd className="text-lg font-semibold">
-                          {selectedClient?.identificationNumber}
-                        </dd>
-                      </div>
-                      <div className="flex flex-col py-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          Correo
-                        </dt>
-                        <dd className="text-lg font-semibold">
-                          {selectedClient?.email}
-                        </dd>
-                      </div>
-                    </dl>
-                    <dl className="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
-                      <div className="flex flex-col pt-3">
-                        <dt className="mb-1 text-gray-500 md:text-lg dark:text-gray-400">
-                          Deuda Total
-                        </dt>
-                        {doubt == 0 ? (
-                          <dd className="text-lg text-green-600 font-semibold">
-                            $ {doubt}
-                          </dd>
-                        ) : (
-                          <dd className="text-lg text-red-600 font-semibold">
-                            $ {doubt}
-                          </dd>
-                        )}
-                      </div>
-                    </dl>
+                      <input
+                        type="text"
+                        placeholder="Filtrar clientes..."
+                        value={filter}
+                        onChange={(e) => filterHandler(e)}
+                        className="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400"
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 col-span-full xl:col-span-6 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700">
-                    <header className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-                      <h2 className="font-semibold text-slate-800 dark:text-slate-100">
-                        Movimientos
-                      </h2>
-                    </header>
-
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                          <tr>
-                            <th scope="col" className="px-6 py-3">
-                              Fecha
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                              Estado
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                              Monto Total
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                              Detalle
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {movements &&
-                            movements.map((mov) => (
-                              <tr
-                                key={mov._id}
-                                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                              >
-                                <td className="px-6 py-4">
-                                  {moment(mov.date).format("DD-MM-YYYY")}
-                                </td>
-                                <td className="px-6 py-4">
-                                  {mov.state === "debit" ? (
-                                    <span className="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                                      No pagado
-                                    </span>
-                                  ) : (
-                                    <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
-                                      Pagado
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4">
-                                  $ {mov.totalAmount}
-                                </td>
-                                <td className="px-6 py-4 flex items-center">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Nombre
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Apellido
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          DNI
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estado
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filter.length === 0
+                        ? clients.map((cli) => (
+                            <tr
+                              key={cli._id}
+                              className="hover:bg-gray-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlerSelectClient(cli._id ? cli._id : "");
+                              }}
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {cli.firstname}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {cli.lastname}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {cli.identificationNumber}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${
+                                    cli.debt ? "red" : "green"
+                                  }-100 text-${cli.debt ? "red" : "green"}-800`}
+                                >
+                                  {cli.debt === true ? "Debe" : "No Debe"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex space-x-3">
                                   <button
-                                    type="button"
-                                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setSelectedMov(mov);
-                                      setDetailModalOpen(true);
+                                      handleUpdate(cli._id ? cli._id : "");
                                     }}
+                                    className="text-indigo-600 hover:text-indigo-900 transition-colors"
                                   >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      viewBox="0 0 20 20"
-                                      fill="currentColor"
-                                      className="size-5"
-                                    >
-                                      <path d="M6 4.75A.75.75 0 0 1 6.75 4h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 4.75ZM6 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 10Zm0 5.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75ZM1.99 4.75a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 15.25a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 10a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1V10Z" />
-                                    </svg>
+                                    <Pencil className="h-5 w-5" />
                                   </button>
-                                  {mov.state == "debit" && (
-                                    <button
-                                      type="button"
-                                      className="text-white bg-[#34A853] hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center dark:bg-green-green dark:hover:bg-green-700 dark:focus:ring-green-800"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedMov(mov);
-                                        setMethodModalOpen(true);
-                                      }}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setDeleteId(
+                                        cli._id
+                                          ? { id: cli._id, type: "client" }
+                                          : { id: "", type: "" }
+                                      );
+                                      setDeleteModalOpen(true);
+                                    }}
+                                    className="text-red-600 hover:text-red-900 transition-colors"
+                                  >
+                                    <Trash2 className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        : filterData.map((cli) => (
+                            <tr key={cli._id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {cli.firstname}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {cli.lastname}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {cli.identificationNumber}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${
+                                    cli.debt ? "red" : "green"
+                                  }-100 text-${cli.debt ? "red" : "green"}-800`}
+                                >
+                                  {cli.debt === true ? "Debe" : "No Debe"}
+                                </span>
+                              </td>
+
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex space-x-3">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUpdate(cli._id ? cli._id : "");
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                                  >
+                                    <Pencil className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setDeleteId(
+                                        cli._id
+                                          ? { id: cli._id, type: "movements" }
+                                          : { id: "", type: "" }
+                                      );
+                                      setDeleteModalOpen(true);
+                                    }}
+                                    className="text-red-600 hover:text-red-900 transition-colors"
+                                  >
+                                    <Trash2 className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Movements Display */}
+                <div className="md:col-span-1">
+                  {selectedClient ? (
+                    <div className="bg-white rounded-lg shadow">
+                      <div className="p-6 border-b border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">
+                              {selectedClient.firstname}
+                            </h2>
+                            <p className="text-gray-500">
+                              {selectedClient.lastname}
+                            </p>
+                          </div>
+                          <div
+                            className={`text-right ${
+                              (doubt ? doubt : 0) > 0
+                                ? "text-red-600"
+                                : "text-green-600"
+                            }`}
+                          >
+                            <p className="text-sm font-medium">Deuda Total</p>
+                            <p className="text-2xl font-bold">
+                              ${doubt?.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-6">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead>
+                            <tr>
+                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Fecha
+                              </th>
+                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estado
+                              </th>
+                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Total
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Acciones
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {selectedClient &&
+                              movements?.map((movement) => (
+                                <tr
+                                  key={movement._id}
+                                  className="hover:bg-gray-50"
+                                >
+                                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                    {new Date(
+                                      movement.date
+                                    ).toLocaleDateString()}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    <span
+                                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        movement.state === "paid"
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-red-100 text-red-800"
+                                      }`}
                                     >
-                                      Pago
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
+                                      {movement.state === "paid" ? (
+                                        <DollarSign className="h-3 w-3 mr-1" />
+                                      ) : (
+                                        <CreditCard className="h-3 w-3 mr-1" />
+                                      )}
+                                      {movement.state === "paid"
+                                        ? "Pagado"
+                                        : "Deuda"}
+                                    </span>
+                                  </td>
+                                  <td
+                                    className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-center ${
+                                      movement.state === "paid"
+                                        ? "text-green-600"
+                                        : "text-red-600"
+                                    }`}
+                                  >
+                                    ${movement.totalAmount?.toFixed(2)}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium items-center">
+                                    <div className="flex space-x-3">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedMov(movement);
+                                          setDetailModalOpen(true);
+                                        }}
+                                        className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                                      >
+                                        <SquareMenu className="h-5 w-5" />
+                                      </button>
+                                      {movement.state === "debit" && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedMov(movement);
+                                            setMethodModalOpen(true);
+                                          }}
+                                          className="text-blue-600 hover:text-red-900 transition-colors"
+                                        >
+                                          <CreditCard className="h-5 w-5" />
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setDeleteId(
+                                            movement._id
+                                              ? {
+                                                  id: movement._id,
+                                                  type: "movements",
+                                                }
+                                              : { id: "", type: "" }
+                                          );
+                                          setDeleteModalOpen(true);
+                                        }}
+                                        className="text-red-600 hover:text-red-900 transition-colors"
+                                      >
+                                        <Trash2 className="h-5 w-5" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg shadow p-8 text-center">
+                      <h3 className="text-lg font-medium text-gray-500">
+                        Seleccionar cliente para ver movimientos
+                      </h3>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Add/Edit Client Modal */}
+            {showModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="bg-white rounded-lg p-8 max-w-md w-full">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold">Cliente</h2>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Nombre
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData?.firstname}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            firstname: e.target.value,
+                          })
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Apellido
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData?.lastname}
+                        onChange={(e) =>
+                          setFormData({ ...formData, lastname: e.target.value })
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={formData?.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Telefono
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData?.phonenumber}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            phonenumber: e.target.value,
+                          })
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        DNI
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData?.identificationNumber}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            phonenumber: e.target.value,
+                          })
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Direccion
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData?.address}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-3 mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setShowModal(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        onClick={handleAddClient}
+                      >
+                        Guardar
+                      </button>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </main>
         <ModalPaymentMethod
@@ -327,6 +677,12 @@ const ClientView = () => {
           setModalOpen={setDetailModalOpen}
           modalOpen={detailModalOpen}
           movement={selectedMov}
+        />
+        <ModalDelete
+          id="delete-modal"
+          modalOpen={deleteModalOpen}
+          setModalOpen={setDeleteModalOpen}
+          deleteFn={deleteHandler}
         />
       </div>
       <Toaster position="bottom-right" />

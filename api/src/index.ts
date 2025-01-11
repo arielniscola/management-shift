@@ -136,7 +136,7 @@ export class ShifManagement {
        */
       processManager.loadProcesses(options.processesPath);
 
-      /** Cramos el cliente AppServer */
+      /** Creamos el cliente AppServer */
       await AppServer.start(options.server.port, {
         routes: options.routes,
       });

@@ -1,6 +1,7 @@
 import { createModel, createSchema } from ".";
 
 export interface IProduct {
+  _id?: string;
   code: string;
   name: string;
   description: string;

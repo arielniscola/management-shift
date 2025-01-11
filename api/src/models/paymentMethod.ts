@@ -1,6 +1,7 @@
 import { createModel, createSchema } from ".";
 
 export interface IPaymentMethod {
+  _id: string;
   companyCode: string;
   name: string;
   description: string;
