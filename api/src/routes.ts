@@ -6,6 +6,7 @@ import { DailyBalanceController } from "./controllers/dailyBalance";
 import { ClientController } from "./controllers/client";
 import { CompanyController } from "./controllers/company";
 import { ShiftController } from "./controllers/shift";
+import { UnitBusinessController } from "./controllers/unitBusiness";
 
 /**
  * Declaracion de Rutas.
@@ -200,6 +201,42 @@ const routes = defineRoutes([
         label: "Turnos",
         method: "put",
         controller: ShiftController.update,
+        auth: false,
+      },
+      {
+        path: "/shifts/:id",
+        label: "Turnos",
+        method: "delete",
+        controller: ShiftController.delete,
+        auth: false,
+      },
+      // Unidad de negocios
+      {
+        path: "/unitBusiness",
+        label: "Turnos",
+        method: "post",
+        controller: UnitBusinessController.create,
+        auth: false,
+      },
+      {
+        path: "/unitBusiness",
+        label: "Unidad de Negocio",
+        method: "get",
+        controller: UnitBusinessController.find,
+        auth: false,
+      },
+      {
+        path: "/unitBusiness",
+        label: "Unidad de Negocio",
+        method: "put",
+        controller: UnitBusinessController.update,
+        auth: false,
+      },
+      {
+        path: "/unitBusiness/:id",
+        label: "Unidad de Negocio",
+        method: "delete",
+        controller: UnitBusinessController.delete,
         auth: false,
       },
     ],
