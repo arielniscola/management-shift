@@ -7,4 +7,5 @@ export interface IClient {
   email: string;
   address: string;
   identificationNumber: string;
+  debt?: boolean;
 }

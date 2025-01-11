@@ -1,6 +1,7 @@
 import { createModel, createSchema } from ".";
 
 export interface IClient {
+  _id?: string;
   companyCode: string;
   firstname: string;
   lastname: string;
@@ -8,6 +9,7 @@ export interface IClient {
   email: string;
   address: string;
   identificationNumber: string;
+  debt?: boolean;
 }
 
 export const ClientSchema = createSchema<IClient>({
@@ -17,15 +19,15 @@ export const ClientSchema = createSchema<IClient>({
   },
   firstname: {
     type: String,
-    required: false,
+    required: true,
   },
   email: {
     type: String,
-    required: true,
+    required: false,
   },
   lastname: {
     type: String,
-    required: false,
+    required: true,
   },
   phonenumber: {
     type: String,

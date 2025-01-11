@@ -65,3 +65,17 @@ export const getMovementsClient = async (id: string = "") => {
     throw error;
   }
 };
+export const deleteClient = async (id: string = "") => {
+  try {
+    const res = await fetch(`${URL_API}/clients/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    const response: ResponseApi<String> = await res.json();
+    if (!res.ok && typeof response.data == "string")
+      throw new Error(response.data);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
