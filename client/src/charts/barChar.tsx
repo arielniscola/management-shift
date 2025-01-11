@@ -142,7 +142,7 @@ const BarChart: FC<BarChart03Props> = ({ data, width, height }) => {
                 item.datasetIndex as number
               ].data.reduce((a: number, b: any) => a + b, 0);
               const valueText = document.createTextNode(
-                `${(theValue / max) * 100}%`
+                `${Math.round((theValue / max) * 100)}%`
               );
               const labelText = document.createTextNode(item.text);
               value.appendChild(valueText);

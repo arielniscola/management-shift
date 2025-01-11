@@ -32,8 +32,6 @@ const FormClientModal: React.FC<FormModalClientProps> = ({
   });
   // Is a edit form
   useEffect(() => {
-    console.log(clientUpdate);
-
     if (clientUpdate) setClient(clientUpdate);
   }, [clientUpdate, modalOpen]);
 

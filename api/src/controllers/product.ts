@@ -16,7 +16,11 @@ export class ProductController {
         ...{ companyCode: companyCode },
         ...(req.query.code ? { code: req.query.code } : {}),
       };
-      const data: IProduct[] = await productService.find(filter);
+      const data: IProduct[] = await productService.find(
+        filter,
+        {},
+        { sort: { name: 1 } }
+      );
 
       return res.status(200).json({ ack: 0, data: data });
     } catch (e) {
@@ -30,6 +34,7 @@ export class ProductController {
     try {
       const companyCode = res.locals.companyCode;
       const product: IProduct = req.body;
+      delete product._id;
       product.companyCode = companyCode;
       /** Verificar si ya se encuentra creado dentro de la compañia */
       const exist = await productService.findOne({
@@ -79,7 +84,7 @@ export class ProductController {
       const companyCode = res.locals.companyCode;
       const id = req.params.id;
       const deleted = await productService.deleteOne({
-        code: id,
+        _id: id,
         companyCode: companyCode,
       });
       if (!deleted) throw new Error("Producto no eliminado");

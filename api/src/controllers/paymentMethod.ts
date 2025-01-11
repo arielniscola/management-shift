@@ -35,7 +35,7 @@ export class PaymentMethodController {
     try {
       const companyCode = res.locals.companyCode;
       const paymentMethod: IPaymentMethod = req.body;
-
+      delete paymentMethod._id;
       /** Validar existencia y datos */
       const exist = await paymentMethodService.findOne({
         companyCode: companyCode,
@@ -66,13 +66,13 @@ export class PaymentMethodController {
       /** Verificar si ya se encuentra creado dentro de la compañia */
       const exist = await paymentMethodService.findOne({
         companyCode: paymentMethod.companyCode,
-        identificationNumber: paymentMethod.identificationNumber,
+        _id: paymentMethod._id,
       });
       if (!exist) throw new Error("Metodo de pago no encontrado");
 
       const updated = await paymentMethodService.updateOne(
         {
-          identificationNumber: paymentMethod.identificationNumber,
+          _id: paymentMethod._id,
           companyCode: companyCode,
         },
         paymentMethod
