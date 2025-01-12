@@ -24,15 +24,18 @@ export class ClientController {
         { sort: { firstname: 1 } }
       );
 
-      for (const c of data) {
-        const movement = await movementService.findOne(
-          { client: c._id, companyCode: companyCode, state: "debit" },
-          {},
-          { sort: { date: -1 } }
-        );
-        if (movement) c.debt = true;
-      }
+      /** Buscar movimientos impagos de clientes */
+      const movements = await movementService.find({
+        client: { $in: data.map((c) => c._id) },
+        companyCode: companyCode,
+        state: "debit",
+      });
 
+      for (const c of data) {
+        if (movements.some((m) => m.client.toString() === c._id.toString())) {
+          c.debt = true;
+        }
+      }
       return res.status(200).json({ ack: 0, data: data });
     } catch (e) {
       logger.error(e);
