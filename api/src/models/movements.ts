@@ -3,6 +3,7 @@ import { createModel, createSchema } from ".";
 import { IPaymentMethod, PaymentMethodSchema } from "./paymentMethod";
 import { IProduct, ProductSchema } from "./products";
 import { IClient } from "./client";
+import { cli } from "winston/lib/winston/config";
 
 export interface IMovement {
   _id: ObjectId;
@@ -53,5 +54,8 @@ const MovementSchema = createSchema<IMovement>({
     required: false,
   },
 });
+
+//create index
+MovementSchema.index({ companyCode: 1, state: 1, client: 1 });
 
 export const MovementModel = createModel("movement", MovementSchema);
