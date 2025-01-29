@@ -14,6 +14,11 @@ interface ShiftModalProps {
   selectedUnitBusiness: string | undefined;
 }
 
+interface FormErrors {
+  client?: string;
+  timeEnd?: string;
+}
+
 const addDurationshift = (time: string) => {
   const [hours, minutes = 0] = time.split(":").map(Number);
   let endTime = hours + 2;
@@ -28,6 +33,7 @@ const STATUS = [
   { value: "confirmed", description: "Confirmado" },
   { value: "debt", description: "No Pagado" },
   { value: "toConfirm", description: "A Confirmar" },
+  { value: "cancelled", description: "Cancelado" },
 ];
 
 export default function ShiftModal({
@@ -48,8 +54,10 @@ export default function ShiftModal({
     status: initialShift?.status || "toConfirm",
     unitBusiness: initialShift?.unitBusiness || selectedUnitBusiness,
     date: initialShift?.date || date,
+    description: initialShift?.description || "",
   });
-
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   useEffect(() => {
     setFormData({
       _id: initialShift?._id || "",
@@ -59,6 +67,7 @@ export default function ShiftModal({
       timeStart: initialShift?.timeStart || time,
       timeEnd: initialShift?.timeEnd || addDurationshift(time),
       date: initialShift?.date || date,
+      description: initialShift?.description || "",
     });
   }, [isOpen]);
 
@@ -66,11 +75,76 @@ export default function ShiftModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
-    onClose();
+    const validationErrors: FormErrors = {
+      client: validateField(
+        "client",
+        typeof formData.client == "string"
+          ? formData.client
+          : formData.client._id || ""
+      ),
+      timeEnd: validateField("timeEnd", formData.timeEnd),
+    };
+    setErrors(validationErrors);
+    setTouched({ company: true, email: true, password: true });
+
+    // Check if there are any errors
+    if (!Object.values(validationErrors).some((error) => error)) {
+      onSave(formData);
+      onClose();
+    }
   };
   const clientHandler = (val: string) => {
     setFormData({ ...formData, client: val });
+  };
+
+  const validateField = (name: string, value: string): string | undefined => {
+    switch (name) {
+      case "client":
+        if (!value.trim()) return "Cliente es requerido";
+        return undefined;
+      case "timeEnd":
+        if (!value) return "Hora de finalización es requerida";
+        if (value < formData.timeStart) return "Hora de finalización inválida";
+        return undefined;
+      default:
+        return undefined;
+    }
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const error = validateField(
+      field,
+      field === "client"
+        ? typeof formData.client === "object"
+          ? formData.client._id || ""
+          : formData.client
+        : field === "timeEnd"
+        ? formData.timeEnd
+        : ""
+    );
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
+
+  const getInputClassName = (name: string) => {
+    const baseClasses =
+      "block w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200";
+    const fieldName: keyof FormErrors = name as keyof FormErrors;
+    const hasError = touched[fieldName] && errors[fieldName];
+    return `${baseClasses} ${
+      hasError ? "border-red-500 bg-red-50" : "border-gray-300"
+    }`;
   };
 
   return (
@@ -97,6 +171,7 @@ export default function ShiftModal({
               Cliente
             </label>
             <SearchableSelect
+              name="client"
               options={clients.map((cli) => ({
                 value: cli._id ? cli._id : cli.firstname,
                 label: `${cli.firstname} ${cli.lastname}`,
@@ -109,6 +184,9 @@ export default function ShiftModal({
               onChange={clientHandler}
               placeholder="Seleccionar a un cliente..."
             />
+            {errors.client && (
+              <p className="mt-1 text-sm text-red-600">{errors.client}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -118,10 +196,9 @@ export default function ShiftModal({
               </label>
               <input
                 type="time"
+                name="timeStart"
                 value={formData.timeStart}
-                onChange={(e) =>
-                  setFormData({ ...formData, timeStart: e.target.value })
-                }
+                onChange={(e) => handleChange(e)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -132,16 +209,30 @@ export default function ShiftModal({
               </label>
               <input
                 type="time"
+                name="timeEnd"
+                onBlur={() => handleBlur("timeEnd")}
+                className={getInputClassName("timeEnd")}
                 value={formData.timeEnd}
-                onChange={(e) =>
-                  setFormData({ ...formData, timeEnd: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => handleChange(e)}
                 required
               />
+              {touched.timeEnd && errors.timeEnd && (
+                <p className="mt-1 text-sm text-red-600">{errors.timeEnd}</p>
+              )}
             </div>
           </div>
-
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Descripcion
+            </label>
+            <input
+              type="text"
+              name="description"
+              value={formData.description}
+              onChange={(e) => handleChange(e)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Estado

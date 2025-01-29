@@ -9,6 +9,7 @@ import { getClients } from "../../services/clientService";
 import { IClient } from "../../interfaces/client";
 import {
   createShift,
+  deleteShift,
   getShifts,
   updateShift,
 } from "../../services/shiftService";
@@ -17,6 +18,7 @@ import moment from "moment";
 import UpdateModalConfirm from "../../components/updateModalConfirm";
 import { IUnitBusiness } from "../../interfaces/unitBusiness";
 import { getUnitBusiness } from "../../services/unitBusinessService";
+import ModalDelete from "../../components/DeleteModal";
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
@@ -35,7 +37,8 @@ function CalendarMenu() {
   const [unitBusiness, setUnitBusiness] = useState<IUnitBusiness[]>([]);
   const [selectedUnitBusiness, setSelectedUnitBusiness] =
     useState<IUnitBusiness>();
-
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string>("");
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -74,7 +77,7 @@ function CalendarMenu() {
       }
     };
     fetchShifts();
-  }, [researchShifts, selectedUnitBusiness]);
+  }, [researchShifts, selectedUnitBusiness, selectedDate, currentDate]);
 
   const handleAddShift = (date: string, time: string) => {
     setSelectedStartTime(time);
@@ -129,6 +132,26 @@ function CalendarMenu() {
       notifyError(error ? error.toString() : "Error");
     } finally {
       setUpdateModalOpen(false);
+      setSelectDragShift(undefined);
+    }
+  };
+
+  const deleteOpen = (id: string) => {
+    setDeleteModalOpen(true);
+    setDeleteId(id);
+  };
+  const deleteHandler = async () => {
+    try {
+      const res = await deleteShift(deleteId);
+      if (res.ack) {
+        notifyError(res.message ? res.message : "error");
+      } else {
+        notify(res.message ? res.message : "ok");
+      }
+      setDeleteModalOpen(false);
+      setResearchShifts(!researchShifts);
+    } catch (error) {
+      notifyError(error ? error.toString() : "error");
     }
   };
 
@@ -173,6 +196,7 @@ function CalendarMenu() {
                 selectedUN={selectedUnitBusiness}
                 setSelectedUN={setSelectedUnitBusiness}
                 unitBusiness={unitBusiness}
+                deleteShift={deleteOpen}
               />
 
               <ShiftModal
@@ -194,6 +218,12 @@ function CalendarMenu() {
               />
             </div>
           </div>
+          <ModalDelete
+            id="delete-modal"
+            modalOpen={deleteModalOpen}
+            setModalOpen={setDeleteModalOpen}
+            deleteFn={deleteHandler}
+          />
           <Toaster position="bottom-right" />
         </main>
       </div>

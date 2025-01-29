@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Transition from "../utils/transitions";
 
-import UserAvatar from "../images/templo-logo.jpeg";
+import { useAuth } from "../context/useAuth";
 
 interface DropdownProfileProps {
   align: string;
@@ -10,10 +10,13 @@ interface DropdownProfileProps {
 
 const DropdownProfile: React.FC<DropdownProfileProps> = ({ align }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  const { logout } = useAuth();
   const trigger = useRef<HTMLButtonElement>(null);
   const dropdown = useRef<HTMLDivElement>(null);
-
+  const jsonString = localStorage.getItem("user") || "";
+  const json = JSON.parse(jsonString);
+  const companyCode = json.companyCode;
+  const username = json.username;
   // close on click outside
   useEffect(() => {
     const clickHandler = (event: MouseEvent) => {
@@ -53,14 +56,14 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({ align }) => {
       >
         <img
           className="w-8 h-8 rounded-full"
-          src={UserAvatar}
+          src={`/images/${companyCode}-logo.jpeg`}
           width="32"
           height="32"
           alt="User"
         />
         <div className="flex items-center truncate">
           <span className="truncate ml-2 text-sm font-medium dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-slate-200">
-            El Templo Padel
+            {username}
           </span>
           <svg
             className="w-3 h-3 shrink-0 ml-1 fill-current text-slate-400"
@@ -90,7 +93,7 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({ align }) => {
         >
           <div className="pt-0.5 pb-2 px-3 mb-1 border-b border-slate-200 dark:border-slate-700">
             <div className="font-medium text-slate-800 dark:text-slate-100">
-              Templo Padel
+              {companyCode}
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 italic">
               Administrator
@@ -100,19 +103,10 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({ align }) => {
             <li>
               <Link
                 className="font-medium text-sm text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center py-1 px-3"
-                to="/settings"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                to="/login"
+                onClick={() => logout()}
               >
-                Settings
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium text-sm text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center py-1 px-3"
-                to="/signin"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                Sign Out
+                Cerrar Sesión
               </Link>
             </li>
           </ul>

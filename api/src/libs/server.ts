@@ -10,6 +10,8 @@ import https from "https";
 import http from "http";
 import validateToken from "../middlewares/validateToken";
 import requestTrace from "../middlewares/requestId";
+import expressSession from "express-session";
+import ShifManagement from "..";
 
 const log = new Log("Server");
 
@@ -111,6 +113,17 @@ export class HttpServer {
     // Cargamos las rutas definidas por el usuario
     const customRouter = this.loadRouter(this._options.routes);
 
+    const secret = ShifManagement.get("server.secret");
+    const session = expressSession({
+      secret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Cookie segura solo en entorno productivo
+      },
+    });
+    this._server.use(session);
     this._server.use(customRouter);
   }
 
