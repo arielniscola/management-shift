@@ -4,6 +4,8 @@ import { IShift } from "../models/shift";
 import { IRouteController } from "../routes/index";
 import { shiftService } from "../services/shift";
 import { ObjectId } from "mongoose";
+import { log } from "console";
+import { IClient } from "../models/client";
 
 export class ShiftController {
   static find: IRouteController<
@@ -94,6 +96,54 @@ export class ShiftController {
       res
         .status(200)
         .json({ ack: 0, message: "Turno eliminado correctamente" });
+    } catch (e) {
+      logger.error(e);
+      return res.status(400).json({ ack: 1, message: e.message });
+    }
+  };
+
+  static statistics: IRouteController<{}, {}, {}, { date: string }> = async (
+    req,
+    res
+  ) => {
+    const logger = new Log(res.locals.requestId, "ShiftController.statistics");
+    try {
+      const companyCode = res.locals.companyCode;
+      const startDate = moment(req.query.date, "MM/YYYY")
+        .startOf("month")
+        .utc(true);
+      const endDate = moment(req.query.date, "MM/YYYY")
+        .utc(true)
+        .endOf("month");
+      const filter = {
+        ...{ companyCode: companyCode },
+        ...(req.query.date
+          ? { date: { $gte: startDate.toDate(), $lte: endDate.toDate() } }
+          : {}),
+      };
+      const data: IShift[] = await shiftService.find(filter, {}, {});
+      let totalForStatus = {
+        paid: 0,
+        confirmed: 0,
+        debt: 0,
+        toConfirm: 0,
+        cancelled: 0,
+        total: 0,
+        clients: 0,
+      };
+      let countClients: string[] = [];
+      for (const el of data) {
+        if (el.status === "paid") totalForStatus.paid += 1;
+        if (el.status === "confirmed") totalForStatus.confirmed += 1;
+        if (el.status === "debt") totalForStatus.debt += 1;
+        if (el.status === "toConfirm") totalForStatus.toConfirm += 1;
+        if (el.status === "cancelled") totalForStatus.cancelled += 1;
+        totalForStatus.total += 1;
+        if (!countClients.includes(el.client as string))
+          countClients.push(el.client as string);
+      }
+      totalForStatus.clients = countClients.length;
+      return res.status(200).json({ ack: 0, data: totalForStatus });
     } catch (e) {
       logger.error(e);
       return res.status(400).json({ ack: 1, message: e.message });
