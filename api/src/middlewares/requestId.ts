@@ -9,8 +9,6 @@ import { IRouteController } from "../routes/index";
 import configCoreService from "../services/config";
 
 export const requestTrace: IRouteController = (req, res, next) => {
-  //
-  res.locals.companyCode = "temploPadel";
   // Si hay x-request-id en el header, usarlo, sino generar uno
   res.locals.requestId =
     req.get("x-request-id") ||

@@ -26,20 +26,19 @@ export class AccessTokenService extends Service<IAccessToken> {
     });
     if (existsValidToken) {
       const expDate = moment(existsValidToken.expDate).toDate().getTime();
-      const expUnit = "ms";
+      const expUnit = "s";
       const expiresIn = moment(expDate).diff(Date.now(), expUnit);
       return { token: existsValidToken.token, expiresIn, expUnit, expDate };
     }
     // Obtenemos el valor del parametro de configuracion de tiempo de expiracion
     // Segun sea o no un usuario API
     const sessionTimeConfig = "sessionExpiresIn";
-    let sessionExpiresIn = (await configService.getValue(
-      sessionTimeConfig,
-      companyCode
-    )) as number;
-    // Si es un usuario API, el parametro estara en minutos, hay que pasarlo a segundos
-
-    // Obtenemos el valor de la clave secreta del jwt
+    let sessionExpiresIn = 36000;
+    //   ((await configService.getValue(
+    //     sessionTimeConfig,
+    //     companyCode
+    //   )) as number) || 3600;
+    // // Obtenemos el valor de la clave secreta del jwt
     const secret = ShifManagement.get("server.secret");
     // Generamos el token de autenticacion
     const token = jwt.sign(
@@ -58,7 +57,7 @@ export class AccessTokenService extends Service<IAccessToken> {
       .add(sessionExpiresIn, "seconds")
       .toDate()
       .getTime();
-    const expUnit = "ms";
+    const expUnit = "s";
     const expiresIn = moment(expDate).diff(Date.now(), expUnit);
 
     // Pisamos el token existente (si existe), o creamos uno nuevo
@@ -103,18 +102,17 @@ export class AccessTokenService extends Service<IAccessToken> {
         // Si existe el token, verificamos que no haya expirado hace menos de MaxTimeInMinutes
         if (existsToken) {
           // Obtenemos los parametros de config.
-          const maxAcumulatedQty = (await configCoreService.getValue(
-            "tokenExpirationMaxAcumulatedQty",
-            companyCode
-          )) as number;
-          const tokenExpirationTimeInMinutes =
-            (await configCoreService.getValue(
-              "tokenExpirationTimeInMinutes",
-              companyCode
-            )) as number;
+          // const maxAcumulatedQty = (await configCoreService.getValue(
+          //   "tokenExpirationMaxAcumulatedQty",
+          //   companyCode
+          // )) as number;
+          // const tokenExpirationTimeInMinutes =
+          //   (await configCoreService.getValue(
+          //     "tokenExpirationTimeInMinutes",
+          //     companyCode
+          //   )) as number;
           // Calcular el rango de tiempo en que se aceptaran tokens expirados segun los parametros de configuracion MaxAcumulatedQty (descuenta uno) y TimeInMinutes
-          const maxTimeInMinutes =
-            (maxAcumulatedQty - 1) * tokenExpirationTimeInMinutes;
+          const maxTimeInMinutes = 60; //         (maxAcumulatedQty - 1) * tokenExpirationTimeInMinutes;
           // Si el token expiro hace menos de MaxTimeInMinutes, devolverlo
           const expiresIn = moment().diff(existsToken.expDate, "minutes");
           // Si el token expiro hace menos de MaxTimeInMinutes, devolverlo
