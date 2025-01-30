@@ -54,6 +54,8 @@ jobs:
 
       - name: Build API
         run: npm run build
+      - name: Restart PM2
+        run: sudo pm2 restart api
 
   client:
     name: Build & Test Client
