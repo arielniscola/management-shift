@@ -29,7 +29,7 @@ jobs:
           CLIENT_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^client/' || true)
 
           echo "api=${API_CHANGED:+true}" >> $GITHUB_OUTPUT
-          echo "client=${CLIENT_CHANGED:+true}" >> $GITHUB_OUTPU
+          echo "client=${CLIENT_CHANGED:+true}" >> $GITHUB_OUTPUT
   
   api:
     name: Build & Test API
