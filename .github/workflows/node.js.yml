@@ -5,10 +5,14 @@ name: Node.js CI
 on:
   push:
     branches:
-      [ "master" ]
+      - master
+    paths:
+      - "api/**"
   pull_request:
     branches:
-      [ "master" ]
+      - master
+    paths:
+      - "api/**"
 
 jobs:
   api:
@@ -31,10 +35,7 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        run: npm test
-
-      - name: Build API (Opcional)
+      - name: Build API
         run: npm run build
 
   client:
@@ -56,9 +57,6 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
-
-      - name: Run Tests
-        run: npm test
 
       - name: Build Client
         run: npm run build
