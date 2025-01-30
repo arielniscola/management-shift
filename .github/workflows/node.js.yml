@@ -6,19 +6,36 @@ on:
   push:
     branches:
       ["master"]
-    paths:
-     ["api/**"]
   pull_request:
     branches:
       ["master"]
-    paths:
-      ["api/**"]
 
 jobs:
+  check-changes:
+    runs-on: self-hosted
+    outputs:
+      api_changed: ${{ steps.filter.outputs.api }}
+      client_changed: ${{ steps.filter.outputs.client }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Files
+        id: filter
+        run: |
+          API_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^api/' || true)
+          CLIENT_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^client/' || true)
+
+          echo "api=${API_CHANGED:+true}" >> $GITHUB_OUTPUT
+          echo "client=${CLIENT_CHANGED:+true}" >> $GITHUB_OUTPU
+  
   api:
     name: Build & Test API
     runs-on: self-hosted
-    if: contains(github.event.head_commit.modified, 'api/')
+    needs: check-changes
+    if: needs.check-changes.outputs.api_changed == 'true'
     defaults:
       run:
         working-directory: api
@@ -41,7 +58,8 @@ jobs:
   client:
     name: Build & Test Client
     runs-on: selft-hosted
-    if: contains(github.event.head_commit.modified, 'client/')
+    needs: check-changes
+    if: needs.check-changes.outputs.client_changed == 'true'
     defaults:
       run:
         working-directory: client
