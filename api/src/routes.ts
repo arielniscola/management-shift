@@ -254,7 +254,7 @@ const routes = defineRoutes([
         label: "Usuarios",
         method: "post",
         controller: UserController.create,
-        auth: true,
+        auth: false,
       },
       // Authentication
       {
