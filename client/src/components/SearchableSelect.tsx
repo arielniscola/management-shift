@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown, X } from "lucide-react";
-import { on } from "events";
-
 interface Option {
   value: string;
   label: string;

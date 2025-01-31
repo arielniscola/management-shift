@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import ModalPaymentMethod from "../../components/PaymentMethodModal";
 import { IMovement } from "../../interfaces/movement";
 import { getLastsMovements } from "../../services/movementService";
