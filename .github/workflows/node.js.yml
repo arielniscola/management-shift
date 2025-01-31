@@ -55,11 +55,11 @@ jobs:
       - name: Build API
         run: npm run build
       - name: Restart PM2
-        run: sudo pm2 restart api
+        run: sudo pm2 restart backend-node
 
   client:
     name: Build & Test Client
-    runs-on: selft-hosted
+    runs-on: self-hosted
     needs: check-changes
     if: needs.check-changes.outputs.client_changed == 'true'
     defaults:
