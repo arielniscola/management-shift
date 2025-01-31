@@ -325,6 +325,11 @@ export default function Calendar({
                         <Clock className="w-3 h-3" />
                         {shift.timeStart} - {shift.timeEnd}
                       </div>
+                      <div className="flex items-center gap-1 text-white/90 text-xs">
+                        <span className="font-semibold">
+                          {shift.description || ""}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
