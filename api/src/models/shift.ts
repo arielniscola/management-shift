@@ -56,6 +56,10 @@ export const ShiftSchema = createSchema<IShift>({
     required: true,
     default: false,
   },
+  description: {
+    type: String,
+    required: false,
+  },
 });
 
 export const ShiftModel = createModel("shift", ShiftSchema);

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
-import UserAvatar from "../images/templo-logo.jpeg";
 import React from "react";
 import SidebarLinkGroup from "./SiderbarLinkGroup";
 interface SidebarProps {
@@ -15,7 +14,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const location = useLocation();
   const { pathname } = location;
-
+  const jsonString = localStorage.getItem("user") || "";
+  const json = JSON.parse(jsonString);
+  const companyCode = json.companyCode;
   const trigger = useRef<HTMLButtonElement>(null);
   const sidebar = useRef<HTMLDivElement>(null);
 
@@ -98,10 +99,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </svg>
           </button>
           {/* Logo */}
-          <NavLink end to="/" className="block">
+          <NavLink end to="/dashboard" className="block">
             <img
               className="w-8 h-8 rounded-full"
-              src={UserAvatar}
+              src={`/images/${companyCode}-logo.jpeg`}
               width="32"
               height="32"
               alt="User"
@@ -127,14 +128,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <ul className="mt-3">
               <li
                 className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${
-                  pathname === "/" && "bg-slate-900"
+                  pathname === "/dashboard" && "bg-slate-900"
                 }`}
               >
                 <NavLink
                   end
                   to="/"
                   className={`block text-slate-200 truncate transition duration-150 ${
-                    pathname === "/"
+                    pathname === "/dashboard"
                       ? "hover:text-slate-200"
                       : "hover:text-white"
                   }`}
@@ -143,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <svg className="shrink-0 h-6 w-6" viewBox="0 0 24 24">
                       <path
                         className={`fill-current ${
-                          pathname === "/"
+                          pathname === "/dashboard"
                             ? "text-indigo-500"
                             : "text-slate-600"
                         }`}
@@ -151,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       />
                       <path
                         className={`fill-current ${
-                          pathname === "/"
+                          pathname === "/dashboard"
                             ? "text-indigo-300"
                             : "text-slate-400"
                         }`}
@@ -550,7 +551,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
-                              to="/utility/changelog"
+                              to="/statistics"
                               className={({ isActive }) =>
                                 "block transition duration-150 truncate " +
                                 (isActive
@@ -563,7 +564,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               </span>
                             </NavLink>
                           </li>
-                          <li className="mb-1 last:mb-0">
+                          {/* <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="/utility/roadmap"
@@ -578,7 +579,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 Ventas
                               </span>
                             </NavLink>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </React.Fragment>

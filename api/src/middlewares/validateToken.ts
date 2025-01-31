@@ -10,7 +10,8 @@ export const validateToken: RequestHandler = async (req, res, next) => {
      * Verificamos si hay una session activa, en caso de que no, redirigimos al login.
      * Si encontramos la session activa, podemos verificar el token.
      */
-    const token = req.session.token;
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
     /** Si no hay token, o es invalido, devolvemos error */
     if (!token) throw MISSING_TOKEN_ERROR;
     /** Si hay token, verificamos que sea valido */
@@ -25,13 +26,8 @@ export const validateToken: RequestHandler = async (req, res, next) => {
     next();
   } catch (error) {
     console.error(`validateToken() Error: ${error.message}`);
-
-    /** Si tenemos un enlace de referencia, pasarlo como enlace para volver luego de iniciar sesion (backTo) */
-    const backTo = req.headers["from"] || req.originalUrl;
-    /** Si es una llamada a API desde la vista, retornar un error */
-    if (req.headers["api"]) return res.status(401).json({ backTo });
-    /** Si no, redirigir al login */
-    return res.redirect(`/login?backTo=${backTo}`);
+    /** Si es una llamada a API, retornar un error */
+    return res.status(401).json({ ack: 1, message: error.message });
   }
 };
 

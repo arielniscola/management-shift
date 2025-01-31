@@ -10,8 +10,14 @@ interface LastSalesProps {
   editMov: (mov: IMovement) => void;
   setMov: (mov: IMovement) => void;
   research: boolean;
+  scrollToTop: () => void;
 }
-const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
+const LastSales: FC<LastSalesProps> = ({
+  editMov,
+  setMov,
+  research,
+  scrollToTop,
+}) => {
   const [methodModalOpen, setMethodModalOpen] = useState(false);
   const [movements, setMovements] = useState<IMovement[]>([]);
   const [selectedMov, setSelectedMov] = useState<IMovement>();
@@ -129,6 +135,7 @@ const LastSales: FC<LastSalesProps> = ({ editMov, setMov, research }) => {
                       {mov.state === "debit" && (
                         <button
                           onClick={() => {
+                            scrollToTop();
                             setSelectedMov(mov);
                             setMov(mov);
                           }}

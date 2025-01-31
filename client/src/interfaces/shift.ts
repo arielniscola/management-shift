@@ -11,4 +11,5 @@ export interface IShift {
   companyCode?: string;
   permanet?: boolean;
   date: string;
+  description?: string;
 }

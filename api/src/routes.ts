@@ -7,6 +7,8 @@ import { ClientController } from "./controllers/client";
 import { CompanyController } from "./controllers/company";
 import { ShiftController } from "./controllers/shift";
 import { UnitBusinessController } from "./controllers/unitBusiness";
+import UserController from "./controllers/user";
+import { AuthenticationController } from "./controllers/authentication";
 
 /**
  * Declaracion de Rutas.
@@ -41,28 +43,28 @@ const routes = defineRoutes([
         label: "Producto",
         method: "get",
         controller: ProductController.find,
-        auth: false,
+        auth: true,
       },
       {
         path: "/product",
         label: "Producto",
         method: "post",
         controller: ProductController.create,
-        auth: false,
+        auth: true,
       },
       {
         path: "/product",
         label: "Producto",
         method: "put",
         controller: ProductController.update,
-        auth: false,
+        auth: true,
       },
       {
         path: "/product/:id",
         label: "Eliminar producto",
         method: "delete",
         controller: ProductController.delete,
-        auth: false,
+        auth: true,
       },
       // Metodos de pago
       {
@@ -70,28 +72,28 @@ const routes = defineRoutes([
         label: "Metodo de pago",
         method: "get",
         controller: PaymentMethodController.find,
-        auth: false,
+        auth: true,
       },
       {
         path: "/paymentMethod",
         label: "Crear Metodo de pago",
         method: "post",
         controller: PaymentMethodController.create,
-        auth: false,
+        auth: true,
       },
       {
         path: "/paymentMethod",
         label: "Actualizar Metodo de pago",
         method: "put",
         controller: PaymentMethodController.update,
-        auth: false,
+        auth: true,
       },
       {
         path: "/paymentMethod/:id",
         label: "Eliminar Metodo de pago",
         method: "delete",
         controller: PaymentMethodController.delete,
-        auth: false,
+        auth: true,
       },
       // Ventas
       {
@@ -99,35 +101,35 @@ const routes = defineRoutes([
         label: "Ventas",
         method: "get",
         controller: MovementController.find,
-        auth: false,
+        auth: true,
       },
       {
         path: "/movement/lasts",
         label: "Ventas",
         method: "get",
         controller: MovementController.findLast,
-        auth: false,
+        auth: true,
       },
       {
         path: "/movement",
         label: "Crear Ventas",
         method: "post",
         controller: MovementController.create,
-        auth: false,
+        auth: true,
       },
       {
         path: "/movement",
         label: "Actualizar Ventas",
         method: "put",
         controller: MovementController.update,
-        auth: false,
+        auth: true,
       },
       {
         path: "/movement/:id",
         label: "Eliminar Ventas",
         method: "delete",
         controller: MovementController.delete,
-        auth: false,
+        auth: true,
       },
       // Balance Diario
       {
@@ -135,7 +137,7 @@ const routes = defineRoutes([
         label: "Cierre balance",
         method: "get",
         controller: DailyBalanceController.find,
-        auth: false,
+        auth: true,
       },
       // Clients
       {
@@ -143,35 +145,35 @@ const routes = defineRoutes([
         label: "Buscar Clientes",
         method: "get",
         controller: ClientController.find,
-        auth: false,
+        auth: true,
       },
       {
         path: "/clients",
         label: "Crear Clientes",
         method: "post",
         controller: ClientController.create,
-        auth: false,
+        auth: true,
       },
       {
         path: "/clients",
         label: "Actualizar Clientes",
         method: "put",
         controller: ClientController.update,
-        auth: false,
+        auth: true,
       },
       {
         path: "/clients/:id",
         label: "Eliminar cliente",
         method: "delete",
         controller: ClientController.delete,
-        auth: false,
+        auth: true,
       },
       {
         path: "/clients/:id",
         label: "Movimientos cliente",
         method: "get",
         controller: ClientController.getMovementClient,
-        auth: false,
+        auth: true,
       },
       // Compañias
       {
@@ -179,7 +181,7 @@ const routes = defineRoutes([
         label: "Compañia",
         method: "post",
         controller: CompanyController.create,
-        auth: false,
+        auth: true,
       },
       // Turnos
       {
@@ -187,28 +189,35 @@ const routes = defineRoutes([
         label: "Turnos",
         method: "post",
         controller: ShiftController.create,
-        auth: false,
+        auth: true,
       },
       {
         path: "/shifts",
         label: "Turnos",
         method: "get",
         controller: ShiftController.find,
-        auth: false,
+        auth: true,
       },
       {
         path: "/shifts",
         label: "Turnos",
         method: "put",
         controller: ShiftController.update,
-        auth: false,
+        auth: true,
       },
       {
         path: "/shifts/:id",
         label: "Turnos",
         method: "delete",
         controller: ShiftController.delete,
-        auth: false,
+        auth: true,
+      },
+      {
+        path: "/shifts/statistics",
+        label: "Turnos",
+        method: "get",
+        controller: ShiftController.statistics,
+        auth: true,
       },
       // Unidad de negocios
       {
@@ -216,27 +225,43 @@ const routes = defineRoutes([
         label: "Turnos",
         method: "post",
         controller: UnitBusinessController.create,
-        auth: false,
+        auth: true,
       },
       {
         path: "/unitBusiness",
         label: "Unidad de Negocio",
         method: "get",
         controller: UnitBusinessController.find,
-        auth: false,
+        auth: true,
       },
       {
         path: "/unitBusiness",
         label: "Unidad de Negocio",
         method: "put",
         controller: UnitBusinessController.update,
-        auth: false,
+        auth: true,
       },
       {
         path: "/unitBusiness/:id",
         label: "Unidad de Negocio",
         method: "delete",
         controller: UnitBusinessController.delete,
+        auth: true,
+      },
+      // Users
+      {
+        path: "/users",
+        label: "Usuarios",
+        method: "post",
+        controller: UserController.create,
+        auth: true,
+      },
+      // Authentication
+      {
+        path: "/users/login",
+        label: "Usuarios",
+        method: "post",
+        controller: AuthenticationController.login,
         auth: false,
       },
     ],

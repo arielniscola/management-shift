@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown, X } from "lucide-react";
-
 interface Option {
   value: string;
   label: string;
@@ -12,6 +11,8 @@ interface SearchableSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  name?: string;
+  onBlur?: (field: string) => void;
 }
 
 export default function SearchableSelect({
@@ -20,6 +21,8 @@ export default function SearchableSelect({
   onChange,
   placeholder = "Seleccionar una opcion...",
   className = "",
+  name = "",
+  onBlur,
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,11 +71,13 @@ export default function SearchableSelect({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
+                name={name}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar..."
                 className="w-full pl-9 pr-4 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 onClick={(e) => e.stopPropagation()}
+                onBlur={onBlur ? () => onBlur(name) : undefined}
               />
               {searchTerm && (
                 <button

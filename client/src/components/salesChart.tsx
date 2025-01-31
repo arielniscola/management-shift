@@ -56,7 +56,11 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
         );
         methods[index].amount += mov.totalAmount;
       } else {
-        if (methods.some((met) => met.method === "Impagos")) {
+        if (
+          methods.some(
+            (met) => met.method === "Impagos" && mov.state === "debit"
+          )
+        ) {
           const index = methods.findIndex((met) => met.method === "Impagos");
           methods[index].amount += mov.totalAmount;
         } else {

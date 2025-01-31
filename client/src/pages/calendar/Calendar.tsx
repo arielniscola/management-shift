@@ -4,12 +4,7 @@ import { es } from "date-fns/locale";
 import { Clock, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import type { IShift } from "../../interfaces/shift";
 import { IUnitBusiness } from "../../interfaces/unitBusiness";
-import toast, { Toaster } from "react-hot-toast";
-import ModalDelete from "../../components/DeleteModal";
-import { deleteShift } from "../../services/shiftService";
-
-const notify = (msg: string) => toast.success(msg);
-const notifyError = (msg: string) => toast.error(msg);
+import { Toaster } from "react-hot-toast";
 
 interface CalendarProps {
   shifts: IShift[];
@@ -26,6 +21,7 @@ interface CalendarProps {
     startTime: string,
     endTime: string
   ) => void;
+  deleteShift: (id: string) => void;
 }
 
 const getColorStatus = (status: string) => {
@@ -35,6 +31,8 @@ const getColorStatus = (status: string) => {
     case "confirmed":
       return "#3B82F6	";
     case "debt":
+      return "#EF4444";
+    case "cancelled":
       return "#EF4444";
     default:
       return "#FBBF24	";
@@ -57,6 +55,7 @@ export default function Calendar({
   selectedUN,
   setSelectedUN,
   unitBusiness,
+  deleteShift,
 }: CalendarProps) {
   const startDate = startOfWeek(selectedDate);
   const dragRef = useRef<{
@@ -70,8 +69,6 @@ export default function Calendar({
     top: number;
     height: number;
   } | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState("");
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(startDate, i + 1);
     return format(date, "yyyy-MM-dd", { locale: es });
@@ -173,19 +170,6 @@ export default function Calendar({
 
   const handleNextWeek = () => {
     onDateChange(addDays(selectedDate, 7));
-  };
-  const deleteHandler = async () => {
-    try {
-      const res = await deleteShift(deleteId);
-      if (res.ack) {
-        notifyError(res.message ? res.message : "error");
-      } else {
-        notify(res.message ? res.message : "ok");
-      }
-      setDeleteModalOpen(false);
-    } catch (error) {
-      notifyError(error ? error.toString() : "error");
-    }
   };
   return (
     <div className="space-y-4">
@@ -333,8 +317,7 @@ export default function Calendar({
                           className="w-4 h-4 text-white/70 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteId(shift._id);
-                            setDeleteModalOpen(true);
+                            deleteShift(shift._id);
                           }}
                         />
                       </div>
@@ -349,12 +332,6 @@ export default function Calendar({
             </div>
           ))}
         </div>
-        <ModalDelete
-          id="delete-modal"
-          modalOpen={deleteModalOpen}
-          setModalOpen={setDeleteModalOpen}
-          deleteFn={deleteHandler}
-        />
         <Toaster position="bottom-right" />
       </div>
     </div>

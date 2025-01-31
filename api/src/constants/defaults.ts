@@ -20,6 +20,13 @@ export const DEFAULT_COMPANY = {
 /**
  * Usuario por defecto (suser)
  */
+export const DEFAULT_SUSER = {
+  username: "suser",
+  password: "Cirilla*2025",
+  name: "Administrador",
+  email: "arielniscola@gmail.com",
+};
+
 export const DEFAULT_LOG_LEVEL = {
   ALTO: 1,
   MEDIO: 2,
