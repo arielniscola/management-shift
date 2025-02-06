@@ -251,9 +251,6 @@ const ClientView = () => {
                           Apellido
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          DNI
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Estado
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -280,11 +277,6 @@ const ClientView = () => {
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-500">
                                   {cli.lastname}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">
-                                  {cli.identificationNumber}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -326,7 +318,14 @@ const ClientView = () => {
                             </tr>
                           ))
                         : filterData.map((cli) => (
-                            <tr key={cli._id} className="hover:bg-gray-50">
+                            <tr
+                              key={cli._id}
+                              className="hover:bg-gray-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlerSelectClient(cli._id ? cli._id : "");
+                              }}
+                            >
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">
                                   {cli.firstname}
@@ -335,11 +334,6 @@ const ClientView = () => {
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-500">
                                   {cli.lastname}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">
-                                  {cli.identificationNumber}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">

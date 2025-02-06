@@ -18,24 +18,35 @@ export class ClientController {
         ...{ companyCode: companyCode },
         ...(req.query.id ? { id: req.query.id } : {}),
       };
-      const data: IClient[] = await clientService.find(
-        filter,
-        {},
-        { sort: { firstname: 1 } }
-      );
-
-      /** Buscar movimientos impagos de clientes */
-      const movements = await movementService.find({
-        client: { $in: data.map((c) => c._id) },
-        companyCode: companyCode,
-        state: "debit",
-      });
-
-      for (const c of data) {
-        if (movements.some((m) => m.client.toString() === c._id.toString())) {
-          c.debt = true;
-        }
-      }
+      const data = await clientService.aggregate([
+        { $match: filter },
+        {
+          $lookup: {
+            from: "movements",
+            let: { clientId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$client", "$$clientId"] }, // Relación entre client y movement
+                      { $eq: ["$companyCode", companyCode] },
+                      { $eq: ["$state", "debit"] },
+                    ],
+                  },
+                },
+              },
+              { $limit: 1 }, // Solo verificar si hay al menos un movimiento impago
+            ],
+            as: "unpaidMovements",
+          },
+        },
+        {
+          $addFields: { debt: { $gt: [{ $size: "$unpaidMovements" }, 0] } },
+        },
+        { $project: { unpaidMovements: 0 } }, // Remover el array innecesario
+        { $sort: { firstname: 1 } },
+      ]);
       return res.status(200).json({ ack: 0, data: data });
     } catch (e) {
       logger.error(e);
