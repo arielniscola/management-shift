@@ -113,7 +113,12 @@ export class ClientController {
     }
   };
 
-  static getMovementClient: IRouteController = async (req, res) => {
+  static getMovementClient: IRouteController<
+    { id: string },
+    {},
+    {},
+    { page: number }
+  > = async (req, res) => {
     const logger = new Log(
       res.locals.requestId,
       "CLlentController.getMovements"
@@ -121,14 +126,13 @@ export class ClientController {
     try {
       const id = req.params.id;
       if (!id) throw new Error("Cliente no seleccionado");
-      const companyCode = res.locals.companyCode;
-
+      const count = await movementService.count({ client: id });
       const movements = await movementService.find(
         { client: id },
         {},
-        { sort: { date: -1 } }
+        { sort: { date: -1 }, skip: (req.query.page - 1) * 10, limit: 10 }
       );
-      return res.status(200).json({ ack: 0, data: movements });
+      return res.status(200).json({ ack: 0, data: movements, total: count });
     } catch (e) {
       logger.error(e);
       return res.status(400).json({ ack: 1, message: e.message });

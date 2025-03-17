@@ -42,7 +42,9 @@ export class MovementController {
       movement.date = date;
       movement.companyCode = companyCode;
       if (movement.client === "") delete movement.client;
-
+      /** Generar numero de movimiento */
+      movement.identifacationNumber =
+        await movementService.generateMovementNumber(companyCode);
       const created = await movementService.insertOne(movement);
       if (!created) throw new Error("No se creo la venta");
       return res
