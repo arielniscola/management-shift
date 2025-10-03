@@ -10,4 +10,6 @@ export interface IMovement {
   state: string;
   paymentMethod?: IPaymentMethod;
   client: string | IClient;
+  amountPaid: number;
+  identifacationNumber?: string;
 }

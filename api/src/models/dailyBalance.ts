@@ -1,11 +1,20 @@
 import { createModel, createSchema } from ".";
 
 export interface IDailyBalance {
+  _id?: string;
   companyCode: string;
   date: Date;
   closedTime: Date;
-  finalBalance: number;
+  finalAmountCash: number;
+  finalAmountTransfer: number;
   state: string;
+  initialAmountCash: number;
+  initialAmountTransfer: number;
+  totalWithdrawalCash: number;
+  totalWithdrawalTransfer: number;
+  identificationNumber: number;
+  realAmountCash?: number;
+  realAmountTransfer?: number;
 }
 
 const DailyBalanceSchema = createSchema<IDailyBalance>(
@@ -20,9 +29,25 @@ const DailyBalanceSchema = createSchema<IDailyBalance>(
     },
     closedTime: {
       type: Date,
-      required: true,
+      required: false,
     },
-    finalBalance: {
+    finalAmountCash: {
+      type: Number,
+      required: false,
+    },
+    initialAmountCash: {
+      type: Number,
+      required: false,
+    },
+    initialAmountTransfer: {
+      type: Number,
+      required: false,
+    },
+    totalWithdrawalCash: {
+      type: Number,
+      required: false,
+    },
+    totalWithdrawalTransfer: {
       type: Number,
       required: false,
     },
@@ -31,13 +56,29 @@ const DailyBalanceSchema = createSchema<IDailyBalance>(
       required: true,
       enum: ["pending", "closed"],
     },
+    identificationNumber: {
+      type: Number,
+      required: true,
+    },
+    realAmountCash: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    realAmountTransfer: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    finalAmountTransfer: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: false,
   }
 );
-
-DailyBalanceSchema.index({ date: 1, companyCode: 1 }, { unique: true });
 
 export const DailyBalanceModel = createModel(
   "dailyBalance",

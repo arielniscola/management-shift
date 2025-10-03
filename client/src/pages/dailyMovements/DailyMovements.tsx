@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Sidebar } from "../partials/sidebar";
-import Header from "../partials/headers";
-import DatepickerWithIcon from "../components/Datepicker";
-import { IMovement } from "../interfaces/movement";
-import DailyMovementsCard from "../components/salesChart";
-import { getDailyBalance } from "../services/dailyBalanceService";
+import { Sidebar } from "../../partials/sidebar";
+import Header from "../../partials/headers";
+import DatepickerWithIcon from "../../components/Datepicker";
+import { IMovement } from "../../interfaces/movement";
+import DailyMovementsCard from "../../components/salesChart";
+import { getDailyBalance } from "../../services/dailyBalanceService";
 import {
   DailyBalanceResponse,
   IDailyBalance,
-} from "../interfaces/dailyBalance";
+} from "../../interfaces/dailyBalance";
 import moment from "moment";
+import CashClousureView from "./CashClousure";
 
 const DailyMovements = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -44,6 +45,7 @@ const DailyMovements = () => {
         {/*  Site header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <main>
+          <CashClousureView />
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
             <div className="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
               <h2 className="mb-4 text-4xl font-semibold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-white">

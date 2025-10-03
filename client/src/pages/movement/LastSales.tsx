@@ -4,7 +4,7 @@ import { IMovement } from "../../interfaces/movement";
 import { getLastsMovements } from "../../services/movementService";
 import { IPaymentMethod } from "../../interfaces/paymentMethod";
 
-import { CheckCircle, Pencil } from "lucide-react";
+import { CreditCard, Pencil } from "lucide-react";
 
 interface LastSalesProps {
   editMov: (mov: IMovement) => void;
@@ -57,17 +57,20 @@ const LastSales: FC<LastSalesProps> = ({
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Fecha
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Cliente
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Productos
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Total
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Restante
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -81,15 +84,15 @@ const LastSales: FC<LastSalesProps> = ({
               {movements &&
                 movements.map((mov) => (
                   <tr key={mov._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
                       {new Date(mov.date).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
                       {mov.client && typeof mov.client == "object"
                         ? `${mov.client.firstname} ${mov.client.lastname}`
                         : "Sin cliente"}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
                       <ul className="list-disc list-inside">
                         {mov.details.map((item, index) => (
                           <li key={index} className="text-sm text-gray-600">
@@ -99,8 +102,11 @@ const LastSales: FC<LastSalesProps> = ({
                         ))}
                       </ul>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-center font-medium">
                       ${mov.totalAmount?.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center font-medium">
+                      ${mov.totalAmount - (mov.amountPaid || 0)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span
@@ -110,7 +116,11 @@ const LastSales: FC<LastSalesProps> = ({
                             : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {mov.state === "debit" ? "Pendiente" : "Pagado"}
+                        {mov.state === "paid"
+                          ? "Pagado"
+                          : mov.state === "debit"
+                          ? "No pagado"
+                          : "Pago parcial"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
@@ -121,18 +131,18 @@ const LastSales: FC<LastSalesProps> = ({
                           setMethodModalOpen(true);
                         }}
                         className={`${
-                          mov.state === "debit"
+                          mov.state != "paid"
                             ? "text-green-600 hover:text-green-800"
                             : "text-yellow-600 hover:text-yellow-800"
                         }`}
                       >
-                        {mov.state === "debit" ? (
-                          <CheckCircle className="w-5 h-5 inline" />
+                        {mov.state != "paid" ? (
+                          <CreditCard className="w-5 h-5 inline" />
                         ) : (
                           ""
                         )}
                       </button>
-                      {mov.state === "debit" && (
+                      {mov.state != "paid" && (
                         <button
                           onClick={() => {
                             scrollToTop();
@@ -155,6 +165,7 @@ const LastSales: FC<LastSalesProps> = ({
           modalOpen={methodModalOpen}
           setModalOpen={setMethodModalOpen}
           setMethod={setMethod}
+          movement={selectedMov}
         />
       </div>
     </div>

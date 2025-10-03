@@ -9,6 +9,7 @@ import { ShiftController } from "./controllers/shift";
 import { UnitBusinessController } from "./controllers/unitBusiness";
 import UserController from "./controllers/user";
 import { AuthenticationController } from "./controllers/authentication";
+import { PaymentController } from "./controllers/payment";
 
 /**
  * Declaracion de Rutas.
@@ -139,6 +140,34 @@ const routes = defineRoutes([
         controller: DailyBalanceController.find,
         auth: true,
       },
+      {
+        path: "/daily-balance/close",
+        label: "Cierre balance",
+        method: "post",
+        controller: DailyBalanceController.closeBalance,
+        auth: true,
+      },
+      {
+        path: "/daily-balance/closes",
+        label: "Cierre balance",
+        method: "get",
+        controller: DailyBalanceController.getBalancesIds,
+        auth: true,
+      },
+      {
+        path: "/daily-balance/:id",
+        label: "Cierre balance",
+        method: "get",
+        controller: DailyBalanceController.findPaymentsBalance,
+        auth: true,
+      },
+      {
+        path: "/daily-balance/withdrawal",
+        label: "Cierre balance",
+        method: "post",
+        controller: DailyBalanceController.withdrawal,
+        auth: true,
+      },
       // Clients
       {
         path: "/clients",
@@ -263,6 +292,28 @@ const routes = defineRoutes([
         method: "post",
         controller: AuthenticationController.login,
         auth: false,
+      },
+      // Payments
+      {
+        path: "/payments",
+        label: "Pagos",
+        method: "get",
+        controller: PaymentController.find,
+        auth: true,
+      },
+      {
+        path: "/payments",
+        label: "Pagos",
+        method: "post",
+        controller: PaymentController.create,
+        auth: true,
+      },
+      {
+        path: "/payments/:id",
+        label: "Pagos",
+        method: "delete",
+        controller: PaymentController.delete,
+        auth: true,
       },
     ],
   },

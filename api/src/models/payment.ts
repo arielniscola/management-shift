@@ -2,12 +2,14 @@ import { createModel, createSchema } from ".";
 import { IPaymentMethod, PaymentMethodSchema } from "./paymentMethod";
 
 export interface IPayment {
+  _id?: string;
   date: Date;
   amount: number;
   companyCode: string;
   client: string;
   paymentMenthod: IPaymentMethod;
   movementsNumber: string[];
+  processed?: boolean;
 }
 
 const PaymentSchema = createSchema<IPayment>({
@@ -17,8 +19,7 @@ const PaymentSchema = createSchema<IPayment>({
   client: { type: String, required: true },
   paymentMenthod: { type: PaymentMethodSchema, required: true },
   movementsNumber: { type: [String], required: false },
+  processed: { type: Boolean, required: true, default: false },
 });
-
-PaymentSchema.index({ client: 1, companyCode: 1 }, { unique: true });
 
 export const PaymentModel = createModel<IPayment>("payment", PaymentSchema);

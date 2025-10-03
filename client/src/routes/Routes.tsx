@@ -4,14 +4,14 @@ import Login from "../pages/login/login";
 import Sales from "../pages/movement/Sales";
 import ProtectedRoute from "./ProtectedRoutes";
 import ClientView from "../pages/client/clientsView";
-import CalendarMenu from "../pages/calendar/CalendarMenu";
 import Dashboard from "../pages/Dashboard";
 import PaymentMethod from "../pages/PaymentMethod/PaymentMethod";
 import Product from "../pages/Product/Product";
 import UnitBusiness from "../pages/unitBusiness/unitBusiness";
-import DailyMovements from "../pages/DailyMovements";
+import DailyMovements from "../pages/dailyMovements/DailyMovements";
 import ShiftStatistics from "../pages/statistics/ShiftStatistics";
 import Unauthorized from "../pages/unauthorized";
+import { ShiftView } from "../pages/shift";
 
 export const router = createBrowserRouter([
   {
@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
         path: "shift",
         element: (
           <ProtectedRoute>
-            <CalendarMenu />
+            <ShiftView />
           </ProtectedRoute>
         ),
       },

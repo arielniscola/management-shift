@@ -1,6 +1,5 @@
 import { Service } from ".";
 import { IPayment, PaymentModel } from "../models/payment";
-import { IProduct, ProductModel } from "../models/products";
 import { movementService } from "./movements";
 
 export class PaymentService extends Service<IPayment> {
@@ -12,6 +11,7 @@ export class PaymentService extends Service<IPayment> {
     {
       try {
         if (payment.movementsNumber.length === 0) {
+          const ids_movements: string[] = [];
           /** Si el pago no corresponde a un mov buscamos los no pagados */
           const movements = await movementService.find(
             {
@@ -25,6 +25,7 @@ export class PaymentService extends Service<IPayment> {
           let amount = payment.amount;
           while (amount > 0) {
             const movement = movements.shift();
+            ids_movements.push(movement._id.toString());
             if (movement) {
               if (movement.totalAmount > amount) {
                 await movementService.updateOne(
@@ -41,13 +42,38 @@ export class PaymentService extends Service<IPayment> {
               }
             }
           }
+          /** Actualizamos pago con facturas relacionadas */
+          await this.updateOne(
+            { _id: payment._id },
+            { movementsNumber: ids_movements }
+          );
         } else {
+          /** Buscamos movimiento y comparamos los montos  */
+          const movement = await movementService.findOne({
+            identifacationNumber: payment.movementsNumber[0],
+          });
+          if (!movement) throw new Error("No se encontro el movimiento");
+          if (
+            movement.totalAmount >
+            payment.amount + (movement.amountPaid || 0)
+          ) {
+            await movementService.updateOne(
+              { identifacationNumber: payment.movementsNumber[0] },
+              {
+                state: "incomplete",
+                amountPaid: payment.amount + (movement.amountPaid || 0),
+              }
+            );
+            return;
+          }
           await movementService.updateMany(
-            { identificationNumber: { $in: payment.movementsNumber } },
-            { state: "paid" }
+            { identifacationNumber: { $in: payment.movementsNumber } },
+            { state: "paid", amountPaid: movement.totalAmount }
           );
         }
-      } catch (error) {}
+      } catch (error) {
+        throw error;
+      }
     }
   }
 }

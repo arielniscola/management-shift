@@ -37,8 +37,7 @@ export class MovementController {
     try {
       const companyCode = res.locals.companyCode;
       const movement: IMovement = req.body;
-      const date = new Date(); // Fecha actual
-      date.setHours(date.getHours() - 3);
+      const date = new Date();
       movement.date = date;
       movement.companyCode = companyCode;
       if (movement.client === "") delete movement.client;
@@ -59,7 +58,6 @@ export class MovementController {
   static update: IRouteController = async (req, res) => {
     const logger = new Log(res.locals.requestId, "MovementController.update");
     try {
-      const companyCode = res.locals.companyCode;
       const mov: IMovement = req.body;
       /** Verificar si existe */
       const exist = await movementService.findOne({
@@ -78,7 +76,6 @@ export class MovementController {
   static delete: IRouteController = async (req, res) => {
     const logger = new Log(res.locals.requestId, "MovementController.delete");
     try {
-      const companyCode = res.locals.companyCode;
       const id = req.params.id;
       const deleted = await movementService.deleteOne({
         _id: id,

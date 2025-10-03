@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import type { IShift } from "../../interfaces/shift";
-import { IClient } from "../../interfaces/client";
-import SearchableSelect from "../../components/SearchableSelect";
+import type { IShift } from "../../../interfaces/shift";
+import { IClient } from "../../../interfaces/client";
+import SearchableSelect from "../../../components/SearchableSelect";
 interface ShiftModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -273,19 +273,12 @@ export default function ShiftModal({
             </div>
           </div> */}
 
-          <div className="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Cancelar
-            </button>
+          <div className="mt-6">
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
-              Guardar
+              Confirmar Reserva
             </button>
           </div>
         </form>

@@ -39,11 +39,9 @@ export class PaymentController {
       const companyCode = res.locals.companyCode;
       const payment: IPayment = req.body;
       const date = new Date();
-      date.setHours(date.getHours() - 3);
       payment.date = date;
       payment.companyCode = companyCode;
       if (payment.client === "") delete payment.client;
-
       const created = await paymentService.insertOne(payment);
       if (!created) throw new Error("No se creo el pago");
       /** Actualizar movimientos pagados */

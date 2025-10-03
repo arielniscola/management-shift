@@ -1,24 +1,24 @@
 import { Calendar as CalendarIcon } from "lucide-react";
 import Calendar from "./Calendar";
 import ShiftModal from "./ShiftModal";
-import type { IShift } from "../../interfaces/shift";
+import type { IShift } from "../../../interfaces/shift";
 import { useEffect, useState } from "react";
-import Header from "../../partials/headers";
-import { Sidebar } from "../../partials/sidebar";
-import { getClients } from "../../services/clientService";
-import { IClient } from "../../interfaces/client";
+import Header from "../../../partials/headers";
+import { Sidebar } from "../../../partials/sidebar";
+import { getClients } from "../../../services/clientService";
+import { IClient } from "../../../interfaces/client";
 import {
   createShift,
   deleteShift,
   getShifts,
   updateShift,
-} from "../../services/shiftService";
+} from "../../../services/shiftService";
 import toast, { Toaster } from "react-hot-toast";
 import moment from "moment";
-import UpdateModalConfirm from "../../components/updateModalConfirm";
-import { IUnitBusiness } from "../../interfaces/unitBusiness";
-import { getUnitBusiness } from "../../services/unitBusinessService";
-import ModalDelete from "../../components/DeleteModal";
+import UpdateModalConfirm from "../../../components/updateModalConfirm";
+import { IUnitBusiness } from "../../../interfaces/unitBusiness";
+import { getUnitBusiness } from "../../../services/unitBusinessService";
+import ModalDelete from "../../../components/DeleteModal";
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
@@ -156,77 +156,60 @@ function CalendarMenu() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      {/* Content area */}
-      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-        {/*  Site header */}
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main>
-          <div className="min-h-screen bg-gray-50 p-8">
-            <div className="mx-auto">
-              <div className="mb-8 flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Gestion Turnos
-                  </h1>
-                  <p className="text-gray-600 mt-1">
-                    Gestione sus turnos por canchas
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-blue-600" />
-                  <span className="text-lg font-medium text-gray-900">
-                    {currentDate.toLocaleDateString("es-ES", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              <Calendar
-                shifts={shifts}
-                onAddShift={handleAddShift}
-                onEditShift={handleEditShift}
-                selectedDate={currentDate}
-                onDateChange={setCurrentDate}
-                onUpdateShift={handleUpdateShift}
-                selectedUN={selectedUnitBusiness}
-                setSelectedUN={setSelectedUnitBusiness}
-                unitBusiness={unitBusiness}
-                deleteShift={deleteOpen}
-              />
-
-              <ShiftModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSaveShift}
-                initialShift={selectedShift}
-                date={selectedDate}
-                time={selectedStartTime}
-                clients={clients}
-                selectedUnitBusiness={selectedUnitBusiness?.code}
-              />
-
-              <UpdateModalConfirm
-                id="update-modal"
-                modalOpen={updateModalOpen}
-                setModalOpen={setUpdateModalOpen}
-                updateFn={handleSaveShift}
-              />
+    <div>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="mx-auto">
+          <div className="flex items-right mb-2">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-blue-600" />
+              <span className="text-lg font-medium text-gray-900">
+                {currentDate.toLocaleDateString("es-ES", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
             </div>
           </div>
-          <ModalDelete
-            id="delete-modal"
-            modalOpen={deleteModalOpen}
-            setModalOpen={setDeleteModalOpen}
-            deleteFn={deleteHandler}
+
+          <Calendar
+            shifts={shifts}
+            onAddShift={handleAddShift}
+            onEditShift={handleEditShift}
+            selectedDate={currentDate}
+            onDateChange={setCurrentDate}
+            onUpdateShift={handleUpdateShift}
+            selectedUN={selectedUnitBusiness}
+            setSelectedUN={setSelectedUnitBusiness}
+            unitBusiness={unitBusiness}
+            deleteShift={deleteOpen}
           />
-          <Toaster position="bottom-right" />
-        </main>
+
+          <ShiftModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSave={handleSaveShift}
+            initialShift={selectedShift}
+            date={selectedDate}
+            time={selectedStartTime}
+            clients={clients}
+            selectedUnitBusiness={selectedUnitBusiness?.code}
+          />
+
+          <UpdateModalConfirm
+            id="update-modal"
+            modalOpen={updateModalOpen}
+            setModalOpen={setUpdateModalOpen}
+            updateFn={handleSaveShift}
+          />
+        </div>
       </div>
+      <ModalDelete
+        id="delete-modal"
+        modalOpen={deleteModalOpen}
+        setModalOpen={setDeleteModalOpen}
+        deleteFn={deleteHandler}
+      />
+      <Toaster position="bottom-right" />
     </div>
   );
 }
