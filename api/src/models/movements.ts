@@ -3,7 +3,6 @@ import { createModel, createSchema } from ".";
 import { IPaymentMethod, PaymentMethodSchema } from "./paymentMethod";
 import { IProduct, ProductSchema } from "./products";
 import { IClient } from "./client";
-import { cli } from "winston/lib/winston/config";
 
 export interface IMovement {
   _id: ObjectId;
@@ -15,6 +14,8 @@ export interface IMovement {
   companyCode: string;
   processed: Boolean;
   client: string | IClient;
+  amountPaid?: number;
+  identifacationNumber?: string;
 }
 
 const MovementSchema = createSchema<IMovement>({
@@ -32,7 +33,7 @@ const MovementSchema = createSchema<IMovement>({
   state: {
     type: String,
     required: true,
-    enum: ["paid", "debit"],
+    enum: ["paid", "debit", "incomplete"],
     default: "debit",
   },
   paymentMethod: {
@@ -51,6 +52,14 @@ const MovementSchema = createSchema<IMovement>({
   client: {
     type: Schema.Types.ObjectId,
     ref: "client",
+    required: false,
+  },
+  amountPaid: {
+    type: Number,
+    required: false,
+  },
+  identifacationNumber: {
+    type: String,
     required: false,
   },
 });

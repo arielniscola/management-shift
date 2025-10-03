@@ -14,9 +14,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const location = useLocation();
   const { pathname } = location;
-  const jsonString = localStorage.getItem("user") || "";
-  const json = JSON.parse(jsonString);
-  const companyCode = json.companyCode;
   const trigger = useRef<HTMLButtonElement>(null);
   const sidebar = useRef<HTMLDivElement>(null);
 
@@ -102,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <NavLink end to="/dashboard" className="block">
             <img
               className="w-8 h-8 rounded-full"
-              src={`/images/${companyCode}-logo.jpeg`}
+              src={`/images/padel3-logo.jpeg`}
               width="32"
               height="32"
               alt="User"

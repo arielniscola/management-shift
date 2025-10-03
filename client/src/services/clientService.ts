@@ -63,9 +63,9 @@ export const updateClient = async (client: IClient) => {
   }
 };
 
-export const getMovementsClient = async (id: string = "") => {
+export const getMovementsClient = async (id: string = "", page: number) => {
   try {
-    const res = await fetch(`${URL_API}/clients/${id}`, {
+    const res = await fetch(`${URL_API}/clients/${id}?page=${page}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export const getMovementsClient = async (id: string = "") => {
     const response: ResponseApi<IMovement> = await res.json();
     if (!res.ok && typeof response.data == "string")
       throw new Error(response.data);
-    return response.data;
+    return { movs: response.data, total: response.total };
   } catch (error) {
     throw error;
   }

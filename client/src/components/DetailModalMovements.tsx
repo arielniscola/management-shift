@@ -97,7 +97,7 @@ const ModalDetailMovements: React.FC<DatailModalMovementsProps> = ({
                 >
                   {movement &&
                     movement.details.map((det) => (
-                      <li className="py-3 sm:py-4">
+                      <li key={det._id} className="py-3 sm:py-4">
                         <div className="flex items-center">
                           <div className="flex-1 min-w-0 ms-4">
                             <p className="text-sm font-medium text-gray-900 truncate dark:text-white">

@@ -2,8 +2,8 @@ import React, { useState, useRef } from "react";
 import { format, startOfWeek, addDays, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Clock, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
-import type { IShift } from "../../interfaces/shift";
-import { IUnitBusiness } from "../../interfaces/unitBusiness";
+import type { IShift } from "../../../interfaces/shift";
+import { IUnitBusiness } from "../../../interfaces/unitBusiness";
 import { Toaster } from "react-hot-toast";
 
 interface CalendarProps {

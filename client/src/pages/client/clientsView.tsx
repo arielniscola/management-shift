@@ -13,10 +13,11 @@ import { IMovement } from "../../interfaces/movement";
 import ModalPaymentMethod from "../../components/PaymentMethodModal";
 import FormClientModal from "../../components/formClientModal";
 import ModalDetailMovements from "../../components/DetailModalMovements";
-import { IPaymentMethod } from "../../interfaces/paymentMethod";
-import { deleteMovement, updateMovement } from "../../services/movementService";
+import { deleteMovement } from "../../services/movementService";
 import toast, { Toaster } from "react-hot-toast";
 import {
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   DollarSign,
   Pencil,
@@ -60,6 +61,24 @@ const ClientView = () => {
     id: "",
     type: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [total, setTotal] = useState(0);
+  const totalPages = Math.ceil(total / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -75,17 +94,19 @@ const ClientView = () => {
   useEffect(() => {
     const fetchmovs = async () => {
       try {
-        const clientsData = (await getMovementsClient(
-          selectedClient?._id
-        )) as IMovement[];
-        totalDoubt(clientsData);
-        setMovements(clientsData);
+        const { movs, total } = await getMovementsClient(
+          selectedClient?._id,
+          currentPage
+        );
+        totalDoubt(movs as IMovement[]);
+        setMovements(movs as IMovement[]);
+        setTotal(total);
       } catch (error) {
         console.error("Error fetching clients:", error);
       }
     };
     fetchmovs();
-  }, [selectedClient, research]);
+  }, [selectedClient, research, currentPage]);
 
   useEffect(() => {
     if (showModal === false) {
@@ -118,11 +139,8 @@ const ClientView = () => {
   };
 
   // Selecciona venta a editar
-  const setEditMoc = (pm: IPaymentMethod) => {
-    if (selectedMov) {
-      let mov: IMovement = { ...selectedMov, paymentMethod: pm, state: "paid" };
-      submitMovement(mov);
-    }
+  const setEditMov = () => {
+    setResearch(!research);
   };
 
   const handleUpdate = (id?: string) => {
@@ -130,21 +148,6 @@ const ClientView = () => {
     if (client) {
       setFormData(client);
       setShowModal(true);
-    }
-  };
-
-  // Guardar pago
-  const submitMovement = async (mov: IMovement) => {
-    try {
-      const res = await updateMovement(mov);
-      if (res.ack) {
-        notifyError(res.message ? res.message : "error");
-      } else {
-        notify(res.message ? res.message : "ok");
-      }
-      setResearch(!research);
-    } catch (error) {
-      notifyError(error ? error.toString() : "Error");
     }
   };
 
@@ -404,6 +407,18 @@ const ClientView = () => {
                             <p className="text-2xl font-bold">
                               ${doubt?.toFixed(2)}
                             </p>
+                            {selectedClient.debt && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMethodModalOpen(true);
+                                }}
+                                className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                              >
+                                <CreditCard className="h-4 w-4" />
+                                <span>Procesar Pago</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -420,6 +435,9 @@ const ClientView = () => {
                               </th>
                               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Total
+                              </th>
+                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Pendiente
                               </th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Acciones
@@ -443,7 +461,9 @@ const ClientView = () => {
                                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                         movement.state === "paid"
                                           ? "bg-green-100 text-green-800"
-                                          : "bg-red-100 text-red-800"
+                                          : movement.state === "debit"
+                                          ? "bg-red-100 text-red-800"
+                                          : "bg-yellow-100 text-yellow-800"
                                       }`}
                                     >
                                       {movement.state === "paid" ? (
@@ -453,17 +473,34 @@ const ClientView = () => {
                                       )}
                                       {movement.state === "paid"
                                         ? "Pagado"
-                                        : "Deuda"}
+                                        : movement.state === "debit"
+                                        ? "Impago"
+                                        : "Parcial"}
                                     </span>
                                   </td>
                                   <td
                                     className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-center ${
                                       movement.state === "paid"
                                         ? "text-green-600"
-                                        : "text-red-600"
+                                        : movement.state === "debit"
+                                        ? "text-red-600"
+                                        : "text-yellow-500"
                                     }`}
                                   >
                                     ${movement.totalAmount?.toFixed(2)}
+                                  </td>
+                                  <td
+                                    className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-center ${
+                                      movement.state === "paid"
+                                        ? "text-green-600"
+                                        : movement.state === "debit"
+                                        ? "text-red-600"
+                                        : "text-yellow-500"
+                                    }`}
+                                  >
+                                    $
+                                    {movement.totalAmount -
+                                      (movement.amountPaid ?? 0)}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium items-center">
                                     <div className="flex space-x-3">
@@ -477,7 +514,7 @@ const ClientView = () => {
                                       >
                                         <SquareMenu className="h-5 w-5" />
                                       </button>
-                                      {movement.state === "debit" && (
+                                      {movement.state != "paid" && (
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -512,6 +549,74 @@ const ClientView = () => {
                               ))}
                           </tbody>
                         </table>
+                        <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                          <div className="flex-1 flex justify-between sm:hidden">
+                            <button
+                              onClick={prevPage}
+                              disabled={currentPage === 1}
+                              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Anterior
+                            </button>
+                            <button
+                              onClick={nextPage}
+                              disabled={currentPage === totalPages}
+                              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Siguiente
+                            </button>
+                          </div>
+                          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                              <p className="text-sm text-gray-700">
+                                Mostrando{" "}
+                                <span className="font-medium">
+                                  {startIndex + 1}
+                                </span>{" "}
+                                a{" "}
+                                <span className="font-medium">
+                                  {Math.min(endIndex, total)}
+                                </span>{" "}
+                                de <span className="font-medium">{total}</span>{" "}
+                                resultados
+                              </p>
+                            </div>
+                            <div>
+                              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                <button
+                                  onClick={prevPage}
+                                  disabled={currentPage === 1}
+                                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  <ChevronLeft className="h-5 w-5" />
+                                </button>
+                                {Array.from(
+                                  { length: totalPages },
+                                  (_, i) => i + 1
+                                ).map((page) => (
+                                  <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                                      currentPage === page
+                                        ? "z-10 bg-indigo-50 border-indigo-500 text-indigo-600"
+                                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                                    }`}
+                                  >
+                                    {page}
+                                  </button>
+                                ))}
+                                <button
+                                  onClick={nextPage}
+                                  disabled={currentPage === totalPages}
+                                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  <ChevronRight className="h-5 w-5" />
+                                </button>
+                              </nav>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -658,7 +763,9 @@ const ClientView = () => {
           id="detail-modal"
           setModalOpen={setMethodModalOpen}
           modalOpen={methodModalOpen}
-          setMethod={setEditMoc}
+          setMethod={setEditMov}
+          client={selectedClient}
+          movement={selectedMov}
         />
         <FormClientModal
           id="form-modal"

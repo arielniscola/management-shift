@@ -7,6 +7,7 @@ import moment from "moment";
 import ModalDelete from "./DeleteModal";
 import { deleteMovement } from "../services/movementService";
 import toast, { Toaster } from "react-hot-toast";
+import { ListTodo, Trash2 } from "lucide-react";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
@@ -46,7 +47,8 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
     let dataSets: IDataSet[] = [];
     let totalAmount = 0;
     let methods: { method: string; amount: number; bgColor: string }[] = [];
-
+    console.log(totalAmountMov);
+    console.log(balance);
     for (const mov of movements) {
       totalAmount += mov.totalAmount;
 
@@ -109,15 +111,6 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
   return (
     <div>
       <div className="col-span-full xl:col-span-6 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700">
-        <div className="px-5 py-3">
-          <div className="flex items-start">
-            <div className="text-3xl font-bold text-slate-800 dark:text-slate-100 mr-2">
-              {balance
-                ? `Total Ventas: $ ${balance.finalBalance} `
-                : `Total Ventas: $ ${totalAmountMov}`}
-            </div>
-          </div>
-        </div>
         {/* Chart built with Chart.js 3 */}
         <div className="grow">
           {/* Change the height attribute to adjust the chart height */}
@@ -130,104 +123,100 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
             Ventas
           </h2>
         </header>
-
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Cliente
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nro. Venta
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Fecha
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
                 </th>
-                <th scope="col" className="px-6 py-3">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Monto Total
                 </th>
-                <th scope="col" className="px-6 py-3">
-                  Detalle
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {movements &&
-                movements.map((mov) => (
-                  <tr
-                    key={mov._id}
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                  >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                    >
+            <tbody className="bg-white divide-y divide-gray-200">
+              {movements.map((mov) => (
+                <tr key={mov._id} className="hover:bg-gray-50 text-center">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-500">
                       {mov.client && typeof mov.client == "object"
                         ? `${mov.client.firstname} ${mov.client.lastname}`
                         : "Sin Cliente"}
-                    </th>
-                    <td className="px-6 py-4">
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {mov.identifacationNumber
+                        ? mov.identifacationNumber
+                        : "N/A"}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-center">
+                    <div className="text-sm text-gray-500">
                       {moment(mov.date).format("DD-MM-YYYY")}
-                    </td>
-                    <td className="px-6 py-4">
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-500">
                       {mov.state === "debit" ? (
                         <span className="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                          No pagado
+                          Impago
                         </span>
                       ) : (
                         <span className="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">
                           Pagado
                         </span>
                       )}
-                    </td>
-                    <td className="px-6 py-4">$ {mov.totalAmount}</td>
-                    <td className="px-6 py-4">
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-500">
+                      $ {mov.totalAmount}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium">
+                    <div className="flex  items-center justify-center space-x-3">
                       <button
-                        type="button"
-                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedMov(mov);
                           setMethodModalOpen(true);
                         }}
+                        className="text-indigo-600 hover:text-indigo-900 transition-colors"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          className="size-5"
-                        >
-                          <path d="M6 4.75A.75.75 0 0 1 6.75 4h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 4.75ZM6 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 10Zm0 5.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75ZM1.99 4.75a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 15.25a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 10a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1V10Z" />
-                        </svg>
+                        <ListTodo className="h-5 w-5" />
                       </button>
                       <button
-                        type="button"
-                        className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-red-red dark:hover:bg-red-700 dark:focus:ring-red-800"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteId(mov._id);
                           setDeleteModalOpen(true);
                         }}
+                        className="text-red-600 hover:text-red-900 transition-colors"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          className="size-5"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                        <Trash2 className="h-5 w-5" />
                       </button>
-                    </td>
-                  </tr>
-                ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+        </div>
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
           <ModalPaymentMethod
             id="method-modal"
             setModalOpen={setMethodModalOpen}

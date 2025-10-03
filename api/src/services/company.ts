@@ -1,4 +1,4 @@
-import { ClientSession, ObjectId, QueryOptions } from "mongoose";
+import { ClientSession } from "mongoose";
 import { insertManyOptions, Service } from ".";
 import ShifManagement from "..";
 import { DEFAULT_COMPANY_SETTINGS } from "../constants/companyConfig";
@@ -7,7 +7,6 @@ import { CompanyModel, ICompany } from "../models/company";
 import configService from "./config";
 import { IAlertConfig } from "../models/alertConfigs";
 import { AlertConfigService } from "./alertConfig";
-import Transaction from "../libs/transaction";
 
 export class CompanyService extends Service<ICompany> {
   constructor() {
