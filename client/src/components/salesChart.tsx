@@ -47,7 +47,8 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
     let dataSets: IDataSet[] = [];
     let totalAmount = 0;
     let methods: { method: string; amount: number; bgColor: string }[] = [];
-
+    console.log(totalAmountMov);
+    console.log(balance);
     for (const mov of movements) {
       totalAmount += mov.totalAmount;
 

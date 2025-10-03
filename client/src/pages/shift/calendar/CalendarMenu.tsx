@@ -3,8 +3,6 @@ import Calendar from "./Calendar";
 import ShiftModal from "./ShiftModal";
 import type { IShift } from "../../../interfaces/shift";
 import { useEffect, useState } from "react";
-import Header from "../../../partials/headers";
-import { Sidebar } from "../../../partials/sidebar";
 import { getClients } from "../../../services/clientService";
 import { IClient } from "../../../interfaces/client";
 import {
@@ -23,7 +21,6 @@ const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
 function CalendarMenu() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [shifts, setShifts] = useState<IShift[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");

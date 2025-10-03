@@ -52,6 +52,8 @@ export const ListView = () => {
       try {
         const clientsData = (await getClients()) as IClient[];
         setClients(clientsData);
+        console.log(clients);
+        console.log(selectedAppointment);
       } catch (error) {
         console.error("Error fetching clients:", error);
       }

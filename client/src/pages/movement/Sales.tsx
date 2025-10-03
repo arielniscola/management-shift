@@ -33,6 +33,7 @@ const Sales = () => {
     totalAmount: 0,
     state: "debit",
     client: "",
+    amountPaid: 0,
   });
 
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -163,6 +164,7 @@ const Sales = () => {
       totalAmount: 0,
       state: "debit",
       client: "",
+      amountPaid: 0,
     });
   };
   const handlePriceChange = (
