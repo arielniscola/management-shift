@@ -2,7 +2,7 @@ import moment from "moment";
 import { Service } from ".";
 import Log from "../libs/logger";
 import { DailyBalanceModel, IDailyBalance } from "../models/dailyBalance";
-import { movementService } from "./movements";
+
 import { paymentService } from "./payment";
 import { withdrawalService } from "./withdrawal";
 
