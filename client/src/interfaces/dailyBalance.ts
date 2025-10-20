@@ -27,13 +27,13 @@ export interface IDailyBalance {
   date: Date;
   closedTime: Date;
   finalAmountCash: number;
-  finalAmountTranfer: number;
+  finalAmountTransfer: number;
   state: string;
   initialAmountCash: number;
-  initialAmountTranfer: number;
+  initialAmountTransfer: number;
   totalWithdrawalCash: number;
-  totalWithdrawalTranfer: number;
+  totalWithdrawalTransfer: number;
   identificationNumber: number;
   realAmountCash: number;
-  realAmountTranfer: number;
+  realAmountTransfer: number;
 }

@@ -41,15 +41,15 @@ const CashClousureView = () => {
     date: new Date(),
     closedTime: new Date(),
     finalAmountCash: 0,
-    finalAmountTranfer: 0,
-    initialAmountTranfer: 0,
+    finalAmountTransfer: 0,
+    initialAmountTransfer: 0,
     initialAmountCash: 0,
     totalWithdrawalCash: 0,
-    totalWithdrawalTranfer: 0,
+    totalWithdrawalTransfer: 0,
     identificationNumber: 0,
     state: "pending",
     realAmountCash: 0,
-    realAmountTranfer: 0,
+    realAmountTransfer: 0,
   });
   const [realAmountCash, setRealAmountCash] = useState(0);
   const [realAmountTransfer, setRealAmountTransfer] = useState(0);
@@ -249,7 +249,7 @@ const CashClousureView = () => {
     if (type === "efectivo") {
       subtotals += selectedBalance.initialAmountCash;
     } else {
-      subtotals += selectedBalance.initialAmountTranfer;
+      subtotals += selectedBalance.initialAmountTransfer;
     }
     return subtotals;
   };
@@ -406,7 +406,7 @@ const CashClousureView = () => {
                     Monto Inicial (Transferencia):
                   </span>
                   <span className="text-lg font-semibold text-gray-900">
-                    {formatCurrency(selectedBalance.initialAmountTranfer)}
+                    {formatCurrency(selectedBalance.initialAmountTransfer)}
                   </span>
                 </div>
               </div>
@@ -453,7 +453,7 @@ const CashClousureView = () => {
                       {formatCurrency(
                         selectedBalance.state === "closed"
                           ? selectedBalance.finalAmountCash +
-                              selectedBalance.finalAmountTranfer
+                              selectedBalance.finalAmountTransfer
                           : partialPaymentAmount
                       )}
                     </span>
@@ -496,7 +496,7 @@ const CashClousureView = () => {
                         {formatCurrency(
                           selectedBalance.state === "closed"
                             ? selectedBalance.totalWithdrawalCash +
-                                selectedBalance.totalWithdrawalTranfer
+                                selectedBalance.totalWithdrawalTransfer
                             : partialWithdrawalAmount
                         )}
                       </span>
@@ -556,7 +556,7 @@ const CashClousureView = () => {
                     {formatCurrency(
                       selectedBalance.state === "pending"
                         ? totalPartialAmount("transferencia")
-                        : selectedBalance.finalAmountTranfer
+                        : selectedBalance.finalAmountTransfer
                     )}
                   </span>
                 </div>
@@ -565,7 +565,7 @@ const CashClousureView = () => {
                     Monto Final (Transferencia):
                   </span>
                   <span className="font-medium">
-                    {formatCurrency(selectedBalance.realAmountTranfer)}
+                    {formatCurrency(selectedBalance.realAmountTransfer)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2">
@@ -574,16 +574,16 @@ const CashClousureView = () => {
                   </span>
                   <span
                     className={`font-bold ${
-                      selectedBalance.finalAmountTranfer -
-                        selectedBalance.realAmountTranfer <
+                      selectedBalance.finalAmountTransfer -
+                        selectedBalance.realAmountTransfer <
                       0
                         ? "text-red-600"
                         : "text-green-600"
                     }`}
                   >
                     {formatCurrency(
-                      selectedBalance.finalAmountTranfer -
-                        selectedBalance.realAmountTranfer
+                      selectedBalance.finalAmountTransfer -
+                        selectedBalance.realAmountTransfer
                     )}
                   </span>
                 </div>
@@ -987,7 +987,7 @@ const CashClousureView = () => {
                   <span className="font-medium">
                     {formatCurrency(
                       selectedBalance.initialAmountCash +
-                        selectedBalance.initialAmountTranfer
+                        selectedBalance.initialAmountTransfer
                     )}
                   </span>
                 </div>
@@ -1011,7 +1011,7 @@ const CashClousureView = () => {
                     {formatCurrency(
                       partialTotalAmount +
                         selectedBalance.initialAmountCash +
-                        selectedBalance.initialAmountTranfer
+                        selectedBalance.initialAmountTransfer
                     )}
                   </span>
                 </div>
@@ -1100,7 +1100,7 @@ const CashClousureView = () => {
                   Monto esperado:{" "}
                   {formatCurrency(
                     totalPartialAmount("transferencia") +
-                      selectedBalance.initialAmountTranfer
+                      selectedBalance.initialAmountTransfer
                   )}
                 </p>
               </div>
