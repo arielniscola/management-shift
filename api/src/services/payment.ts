@@ -51,6 +51,8 @@ export class PaymentService extends Service<IPayment> {
           /** Buscamos movimiento y comparamos los montos  */
           const movement = await movementService.findOne({
             identifacationNumber: payment.movementsNumber[0],
+            companyCode: companyCode,
+            state: { $in: ["debit", "incomplete"] },
           });
           if (!movement) throw new Error("No se encontro el movimiento");
           console.log(movement);
