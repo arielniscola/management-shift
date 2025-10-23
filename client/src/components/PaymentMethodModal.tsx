@@ -15,7 +15,8 @@ interface ModalPaymentMethodProps {
   id: string;
   modalOpen: boolean;
   setModalOpen: (modalOpen: boolean) => void;
-  setMethod: (method: IPaymentMethod) => void;
+  setResearch: (research: boolean) => void;
+  research: boolean;
   client?: IClient;
   movement?: IMovement;
 }
@@ -24,7 +25,8 @@ const ModalPaymentMethod: React.FC<ModalPaymentMethodProps> = ({
   id,
   modalOpen,
   setModalOpen,
-  setMethod,
+  setResearch,
+  research,
   client,
   movement,
 }) => {
@@ -114,6 +116,7 @@ const ModalPaymentMethod: React.FC<ModalPaymentMethodProps> = ({
     } catch (error) {
       notifyError(error ? error.toString() : "Error");
     } finally {
+      setResearch(!research);
       setModalOpen(false);
       setSelectedMethod(null);
       setTotal(0);
@@ -212,7 +215,6 @@ const ModalPaymentMethod: React.FC<ModalPaymentMethodProps> = ({
                   disabled={!selectedMethod}
                   className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => {
-                    setMethod(selectedMethod!);
                     submitPayment(payment);
                   }}
                 >

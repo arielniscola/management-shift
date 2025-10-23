@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Service } from ".";
 import { IPayment, PaymentModel } from "../models/payment";
 import { movementService } from "./movements";
@@ -61,18 +62,6 @@ export class PaymentService extends Service<IPayment> {
             Number(movement.totalAmount) >
             Number(payment.amount) + Number(movement.amountPaid)
           ) {
-            console.log(">>> MOVEMENT UPDATE", {
-              id: movement._id,
-              totalAmount: movement.totalAmount,
-              amountPaid: movement.amountPaid,
-              paymentAmount: payment.amount,
-              newPaid: payment.amount + (movement.amountPaid || 0),
-              newState:
-                movement.totalAmount >
-                payment.amount + (movement.amountPaid || 0)
-                  ? "incomplete"
-                  : "paid",
-            });
             await movementService.updateOne(
               { _id: movement._id, state: { $in: ["debit", "incomplete"] } },
               {
@@ -83,18 +72,6 @@ export class PaymentService extends Service<IPayment> {
             );
             return;
           } else {
-            console.log(">>> MOVEMENT UPDATE", {
-              id: movement._id,
-              totalAmount: movement.totalAmount,
-              amountPaid: movement.amountPaid,
-              paymentAmount: payment.amount,
-              newPaid: payment.amount + (movement.amountPaid || 0),
-              newState:
-                movement.totalAmount >
-                payment.amount + (movement.amountPaid || 0)
-                  ? "incomplete"
-                  : "paid",
-            });
             await movementService.updateOne(
               { _id: movement._id, state: { $in: ["debit", "incomplete"] } },
               { state: "paid", amountPaid: movement.totalAmount }
@@ -103,6 +80,7 @@ export class PaymentService extends Service<IPayment> {
         }
       } catch (error) {
         throw error;
+      } finally {
       }
     }
   }

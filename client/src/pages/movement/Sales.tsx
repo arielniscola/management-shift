@@ -136,14 +136,18 @@ const Sales = () => {
   const changePaymentMethod = async (mov: IMovement) => {
     try {
       const res = await updateMovement(mov);
+      console.log("esto se ejecuta");
+
       if (res.ack) {
         notifyError(res.message ? res.message : "error");
       } else {
         notify(res.message ? res.message : "ok");
       }
-      setResearch(!research);
     } catch (error) {
       notifyError(error ? error.toString() : "Error");
+    } finally {
+      console.log("refrescar");
+      setResearch(!research);
     }
   };
   // Selecciona venta a editar
@@ -408,6 +412,7 @@ const Sales = () => {
             editMov={changePaymentMethod}
             setMov={setEditMoc}
             research={research}
+            setResearch={setResearch}
             scrollToTop={scrollToTop}
           />
           <FormClientModal
