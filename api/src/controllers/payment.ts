@@ -43,6 +43,7 @@ export class PaymentController {
       payment.companyCode = companyCode;
       if (payment.client === "") delete payment.client;
       const created = await paymentService.insertOne(payment);
+      console.log(created);
       if (!created) throw new Error("No se creo el pago");
       /** Actualizar movimientos pagados */
       await paymentService.updateMovements(payment, companyCode);
