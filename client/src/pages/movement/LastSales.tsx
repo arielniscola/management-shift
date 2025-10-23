@@ -2,8 +2,6 @@ import { FC, useEffect, useState } from "react";
 import ModalPaymentMethod from "../../components/PaymentMethodModal";
 import { IMovement } from "../../interfaces/movement";
 import { getLastsMovements } from "../../services/movementService";
-import { IPaymentMethod } from "../../interfaces/paymentMethod";
-
 import { CreditCard, Pencil } from "lucide-react";
 
 interface LastSalesProps {
@@ -11,11 +9,12 @@ interface LastSalesProps {
   setMov: (mov: IMovement) => void;
   research: boolean;
   scrollToTop: () => void;
+  setResearch: (research: boolean) => void;
 }
 const LastSales: FC<LastSalesProps> = ({
-  editMov,
   setMov,
   research,
+  setResearch,
   scrollToTop,
 }) => {
   const [methodModalOpen, setMethodModalOpen] = useState(false);
@@ -33,15 +32,6 @@ const LastSales: FC<LastSalesProps> = ({
     };
     fetchMovements();
   }, [research]);
-
-  const setMethod = (method: IPaymentMethod) => {
-    if (selectedMov) {
-      selectedMov.paymentMethod = method;
-      selectedMov.state = "paid";
-
-      editMov(selectedMov);
-    }
-  };
 
   return (
     <div className="col-span-full ml-10 mr-10 xl:col-span-6 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700">
@@ -164,8 +154,9 @@ const LastSales: FC<LastSalesProps> = ({
           id="method-modal"
           modalOpen={methodModalOpen}
           setModalOpen={setMethodModalOpen}
-          setMethod={setMethod}
           movement={selectedMov}
+          setResearch={setResearch}
+          research={research}
         />
       </div>
     </div>
