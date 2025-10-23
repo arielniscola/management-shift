@@ -138,11 +138,6 @@ const ClientView = () => {
     setDoubt(total);
   };
 
-  // Selecciona venta a editar
-  const setEditMov = () => {
-    setResearch(!research);
-  };
-
   const handleUpdate = (id?: string) => {
     const client = clients.find((u) => u._id === id);
     if (client) {
@@ -763,7 +758,8 @@ const ClientView = () => {
           id="detail-modal"
           setModalOpen={setMethodModalOpen}
           modalOpen={methodModalOpen}
-          setMethod={setEditMov}
+          setResearch={setResearch}
+          research={research}
           client={selectedClient}
           movement={selectedMov}
         />
