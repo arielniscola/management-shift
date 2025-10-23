@@ -28,12 +28,34 @@ export class PaymentService extends Service<IPayment> {
             ids_movements.push(movement._id.toString());
             if (movement) {
               if (movement.totalAmount > amount) {
+                console.log({
+                  movementId: movement._id,
+                  total: movement.totalAmount,
+                  paid: payment.amount,
+                  prevPaid: movement.amountPaid,
+                  newState:
+                    movement.totalAmount >
+                    payment.amount + (movement.amountPaid || 0)
+                      ? "incomplete"
+                      : "paid",
+                });
                 await movementService.updateOne(
                   { _id: movement._id },
                   { state: "incomplete", amountPaid: amount }
                 );
                 amount = 0;
               } else {
+                console.log({
+                  movementId: movement._id,
+                  total: movement.totalAmount,
+                  paid: payment.amount,
+                  prevPaid: movement.amountPaid,
+                  newState:
+                    movement.totalAmount >
+                    payment.amount + (movement.amountPaid || 0)
+                      ? "incomplete"
+                      : "paid",
+                });
                 await movementService.updateOne(
                   { _id: movement._id },
                   { state: "paid", amountPaid: movement.totalAmount }
@@ -57,6 +79,17 @@ export class PaymentService extends Service<IPayment> {
             movement.totalAmount >
             payment.amount + (movement.amountPaid || 0)
           ) {
+            console.log({
+              movementId: movement._id,
+              total: movement.totalAmount,
+              paid: payment.amount,
+              prevPaid: movement.amountPaid,
+              newState:
+                movement.totalAmount >
+                payment.amount + (movement.amountPaid || 0)
+                  ? "incomplete"
+                  : "paid",
+            });
             await movementService.updateOne(
               { identifacationNumber: payment.movementsNumber[0] },
               {
@@ -66,6 +99,16 @@ export class PaymentService extends Service<IPayment> {
             );
             return;
           }
+          console.log({
+            movementId: movement._id,
+            total: movement.totalAmount,
+            paid: payment.amount,
+            prevPaid: movement.amountPaid,
+            newState:
+              movement.totalAmount > payment.amount + (movement.amountPaid || 0)
+                ? "incomplete"
+                : "paid",
+          });
           await movementService.updateMany(
             { identifacationNumber: { $in: payment.movementsNumber } },
             { state: "paid", amountPaid: movement.totalAmount }
