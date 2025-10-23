@@ -58,20 +58,21 @@ export class PaymentService extends Service<IPayment> {
           console.log(movement);
 
           if (
-            movement.totalAmount >
-            payment.amount + (movement.amountPaid || 0)
+            Number(movement.totalAmount) >
+            Number(payment.amount) + Number(movement.amountPaid)
           ) {
             await movementService.updateOne(
-              { identifacationNumber: payment.movementsNumber[0] },
+              { _id: movement._id, state: { $in: ["debit", "incomplete"] } },
               {
                 state: "incomplete",
-                amountPaid: payment.amount + (movement.amountPaid || 0),
+                amountPaid:
+                  Number(payment.amount) + Number(movement.amountPaid),
               }
             );
             return;
           } else {
             await movementService.updateOne(
-              { identifacationNumber: { $in: payment.movementsNumber } },
+              { _id: movement._id, state: { $in: ["debit", "incomplete"] } },
               { state: "paid", amountPaid: movement.totalAmount }
             );
           }
