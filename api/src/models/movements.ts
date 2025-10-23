@@ -14,7 +14,7 @@ export interface IMovement {
   companyCode: string;
   processed: Boolean;
   client: string | IClient;
-  amountPaid?: number;
+  amountPaid: number;
   identifacationNumber?: string;
 }
 
@@ -57,6 +57,7 @@ const MovementSchema = createSchema<IMovement>({
   amountPaid: {
     type: Number,
     required: false,
+    default: 0,
   },
   identifacationNumber: {
     type: String,
