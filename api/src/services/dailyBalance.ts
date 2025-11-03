@@ -45,7 +45,6 @@ export class DailyBalanceService extends Service<IDailyBalance> {
     try {
       /** Buscamos balance pendiente de cierre */
       const closedTime = new Date();
-      closedTime.setHours(closedTime.getHours() - 3);
       const balance: IDailyBalance = await this.findOne(
         {
           companyCode: companyCode,

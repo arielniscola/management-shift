@@ -132,7 +132,7 @@ const LastSales: FC<LastSalesProps> = ({
                           ""
                         )}
                       </button>
-                      {mov.state != "paid" && (
+                      {mov.state == "debit" && (
                         <button
                           onClick={() => {
                             scrollToTop();

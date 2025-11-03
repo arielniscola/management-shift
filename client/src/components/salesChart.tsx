@@ -1,5 +1,4 @@
-import { FC, useEffect, useState } from "react";
-import BarChart from "../charts/barChar";
+import { FC, useState } from "react";
 import { IMovement } from "../interfaces/movement";
 import { IDailyBalance } from "../interfaces/dailyBalance";
 import ModalPaymentMethod from "./DetailModalMovements";
@@ -12,15 +11,6 @@ import { ListTodo, Trash2 } from "lucide-react";
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
-interface IDataSet {
-  label: string;
-  data: number[];
-  backgroundColor: string;
-  hoverBackgroundColor: string;
-  barPercentage: number;
-  categoryPercentage: number;
-}
-
 interface DailyMovementsProps {
   movements: IMovement[];
   setReload: (reload: boolean) => void;
@@ -29,69 +19,14 @@ interface DailyMovementsProps {
 }
 const DailyMovementsCard: FC<DailyMovementsProps> = ({
   movements,
-  balance,
   setReload,
   reload,
 }) => {
   const [selectedMov, setSelectedMov] = useState<IMovement>();
   const [methodModalOpen, setMethodModalOpen] = useState(false);
-  const [chartData, setChartData] = useState<{
-    datasets: IDataSet[];
-    labels: string[];
-  }>({ datasets: [], labels: ["Reasons"] });
-  const [totalAmountMov, setTotalAmountMov] = useState<number>(0);
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string>();
-
-  useEffect(() => {
-    let dataSets: IDataSet[] = [];
-    let totalAmount = 0;
-    let methods: { method: string; amount: number; bgColor: string }[] = [];
-    console.log(totalAmountMov);
-    console.log(balance);
-    for (const mov of movements) {
-      totalAmount += mov.totalAmount;
-
-      if (methods.some((met) => met.method === mov.paymentMethod?.name)) {
-        const index = methods.findIndex(
-          (met) => met.method === mov.paymentMethod?.name
-        );
-        methods[index].amount += mov.totalAmount;
-      } else {
-        if (
-          methods.some(
-            (met) => met.method === "Impagos" && mov.state === "debit"
-          )
-        ) {
-          const index = methods.findIndex((met) => met.method === "Impagos");
-          methods[index].amount += mov.totalAmount;
-        } else {
-          methods.push({
-            method: mov.paymentMethod?.name
-              ? mov.paymentMethod.name
-              : "Impagos",
-            amount: mov.totalAmount,
-            bgColor: mov.paymentMethod?.colorBanner
-              ? mov.paymentMethod.colorBanner
-              : "#312e81",
-          });
-        }
-      }
-    }
-    for (const met of methods) {
-      let data: IDataSet = {
-        label: met.method,
-        data: [met.amount],
-        backgroundColor: met.bgColor,
-        hoverBackgroundColor: "#312e81",
-        barPercentage: 1,
-        categoryPercentage: 1,
-      };
-      dataSets.push(data);
-    }
-    setChartData({ datasets: dataSets, labels: ["Reasons"] });
-    setTotalAmountMov(totalAmount);
-  }, [movements]);
 
   const deleteHandler = async () => {
     try {
@@ -110,13 +45,7 @@ const DailyMovementsCard: FC<DailyMovementsProps> = ({
 
   return (
     <div>
-      <div className="col-span-full xl:col-span-6 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700">
-        {/* Chart built with Chart.js 3 */}
-        <div className="grow">
-          {/* Change the height attribute to adjust the chart height */}
-          <BarChart data={chartData} width={595} height={48} />
-        </div>
-      </div>
+      <div className="col-span-full xl:col-span-6 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700"></div>
       <div className="mt-2 col-span-full xl:col-span-6 bg-white dark:bg-slate-800 shadow-lg rounded-sm border border-slate-200 dark:border-slate-700">
         <header className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
           <h2 className="font-semibold text-slate-800 dark:text-slate-100">

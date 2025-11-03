@@ -18,9 +18,7 @@ export class DailyBalanceController {
     try {
       const companyCode = res.locals.companyCode;
       const startDate = moment(req.query.date, "YYYY/MM/DD");
-      const endDate = moment(req.query.date, "YYYY/MM/DD")
-        .endOf("day")
-        .add(3, "h");
+      const endDate = moment(req.query.date, "YYYY/MM/DD").endOf("day");
       const filter = {
         ...{ companyCode: companyCode },
         ...(req.query.date
@@ -56,6 +54,7 @@ export class DailyBalanceController {
     );
     try {
       const companyCode = res.locals.companyCode;
+
       const { realAmountCash, realAmountTransfer } = req.body;
       /** Realizamos cierre de balance */
       const balanceClosed = await dailyBalanceService.closeBalance(
@@ -64,6 +63,15 @@ export class DailyBalanceController {
         realAmountTransfer
       );
       const initialDate = new Date();
+      /** Validamos que no hay otro banlance pendiente creado */
+      const existPending = await dailyBalanceService.findOne({
+        companyCode: companyCode,
+        state: "pending",
+      });
+      if (existPending)
+        throw new Error(
+          "Ya existe un balance pendiente de cierre. No se puede crear uno nuevo."
+        );
       /** Creamos inicio de balance nuevo */
       await dailyBalanceService.insertOne({
         companyCode: companyCode,
@@ -138,8 +146,19 @@ export class DailyBalanceController {
       const filter = {
         ...{ companyCode: companyCode },
         ...(balance.state === "closed"
-          ? { date: { $gte: balance.date, $lte: balance.closedTime } }
-          : { date: { $gte: balance.date } }),
+          ? {
+              date: {
+                $gte: new Date(balance.date.getTime() + 3 * 60 * 60 * 1000),
+                $lte: new Date(
+                  balance.closedTime.getTime() + 3 * 60 * 60 * 1000
+                ),
+              },
+            }
+          : {
+              date: {
+                $gte: balance.date,
+              },
+            }),
       };
       /** Buscamos pagos y retiros correspondientes al cierre de caja */
       const payments = await paymentService.find(
