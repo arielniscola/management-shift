@@ -3,6 +3,8 @@ import Log from "../libs/logger";
 import { IMovement } from "../models/movements";
 import { IRouteController } from "../routes/index";
 import { movementService } from "../services/movements";
+import { IPayment } from "../models/payment";
+import { paymentService } from "../services/payment";
 
 export class MovementController {
   static find: IRouteController<{}, {}, {}, { date: string; client: string }> =
@@ -32,11 +34,15 @@ export class MovementController {
       }
     };
 
-  static create: IRouteController = async (req, res) => {
+  static create: IRouteController<
+    {},
+    {},
+    { movement: IMovement; payments?: IPayment[] }
+  > = async (req, res) => {
     const logger = new Log(res.locals.requestId, "MovementController.create");
     try {
       const companyCode = res.locals.companyCode;
-      const movement: IMovement = req.body;
+      const { movement } = req.body;
       const date = new Date();
       movement.date = date;
       movement.companyCode = companyCode;
@@ -44,6 +50,28 @@ export class MovementController {
       /** Generar numero de movimiento */
       movement.identifacationNumber =
         await movementService.generateMovementNumber(companyCode);
+      /** Si el estado es pagada crear pagos y validar si los montos de los pagos es el total de la venta*/
+      let totalPayments = 0;
+      if (
+        movement.state === "paid" &&
+        req.body.payments &&
+        req.body.payments.length > 0
+      ) {
+        for (const pay of req.body.payments) {
+          totalPayments += pay.amount;
+          pay.movementsNumber = [movement.identifacationNumber];
+          pay.date = date;
+          pay.companyCode = companyCode;
+          await paymentService.insertOne(pay);
+        }
+        if (totalPayments < movement.totalAmount) {
+          movement.state = "incomplete";
+          movement.amountPaid = totalPayments;
+        } else {
+          movement.amountPaid = movement.totalAmount;
+        }
+      }
+
       const created = await movementService.insertOne(movement);
       if (!created) throw new Error("No se creo la venta");
       return res
@@ -55,16 +83,42 @@ export class MovementController {
     }
   };
 
-  static update: IRouteController = async (req, res) => {
+  static update: IRouteController<
+    {},
+    {},
+    { movement: IMovement; payments?: IPayment[] }
+  > = async (req, res) => {
     const logger = new Log(res.locals.requestId, "MovementController.update");
     try {
-      const mov: IMovement = req.body;
+      const { movement } = req.body;
       /** Verificar si existe */
       const exist = await movementService.findOne({
-        _id: mov._id,
+        _id: movement._id,
       });
       if (!exist) throw new Error("Venta no encontrada");
-      const movUpdated = await movementService.updateOne({ _id: mov._id }, mov);
+      let totalPayments = 0;
+      if (
+        movement.state === "paid" &&
+        req.body.payments &&
+        req.body.payments.length > 0
+      ) {
+        for (const pay of req.body.payments) {
+          totalPayments += pay.amount;
+          pay.movementsNumber = [movement.identifacationNumber];
+          pay.date = new Date();
+          pay.companyCode = exist.companyCode;
+          await paymentService.insertOne(pay);
+        }
+        if (totalPayments < movement.totalAmount) {
+          movement.state = "incomplete";
+          movement.amountPaid = totalPayments;
+        }
+      }
+      if (movement.client === "") delete movement.client;
+      const movUpdated = await movementService.updateOne(
+        { _id: movement._id },
+        movement
+      );
       if (!movUpdated) throw new Error("Venta no se actualizo");
       return res.status(200).json({ ack: 0, message: "Venta actualizada" });
     } catch (e) {

@@ -1,5 +1,6 @@
 import { unauthorized } from ".";
 import { IMovement } from "../interfaces/movement";
+import { IPayment } from "../interfaces/payment";
 import { ResponseApi } from "../interfaces/responseApi";
 import { URL_API } from "./constants";
 
@@ -40,7 +41,7 @@ export const getLastsMovements = async () => {
   }
 };
 
-export const createMovement = async (mov: IMovement) => {
+export const createMovement = async (mov: IMovement, payments?: IPayment[]) => {
   try {
     const res = await fetch(`${URL_API}/movement`, {
       method: "POST",
@@ -48,7 +49,7 @@ export const createMovement = async (mov: IMovement) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(mov),
+      body: JSON.stringify({ movement: mov, payments: payments }),
     });
     if (res.status === 401) unauthorized();
     const response: ResponseApi<String> = await res.json();
@@ -60,7 +61,7 @@ export const createMovement = async (mov: IMovement) => {
   }
 };
 
-export const updateMovement = async (mov: IMovement) => {
+export const updateMovement = async (mov: IMovement, payments?: IPayment[]) => {
   try {
     const res = await fetch(`${URL_API}/movement`, {
       method: "PUT",
@@ -68,7 +69,7 @@ export const updateMovement = async (mov: IMovement) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(mov),
+      body: JSON.stringify({ movement: mov, payments: payments }),
     });
     if (res.status === 401) unauthorized();
     const response: ResponseApi<String> = await res.json();

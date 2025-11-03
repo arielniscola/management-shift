@@ -56,8 +56,6 @@ export class PaymentService extends Service<IPayment> {
             state: { $in: ["debit", "incomplete"] },
           });
           if (!movement) throw new Error("No se encontro el movimiento");
-          console.log(movement);
-
           if (
             Number(movement.totalAmount) >
             Number(payment.amount) + Number(movement.amountPaid)

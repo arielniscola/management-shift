@@ -6,7 +6,7 @@ export interface IPayment {
   date: Date;
   amount: number;
   companyCode: string;
-  client: string;
+  client?: string;
   paymentMenthod: IPaymentMethod;
   movementsNumber: string[];
   processed?: boolean;
@@ -16,7 +16,7 @@ const PaymentSchema = createSchema<IPayment>({
   date: { type: Date, required: true },
   amount: { type: Number, required: true },
   companyCode: { type: String, required: true },
-  client: { type: String, required: true },
+  client: { type: String, required: false },
   paymentMenthod: { type: PaymentMethodSchema, required: true },
   movementsNumber: { type: [String], required: false },
   processed: { type: Boolean, required: true, default: false },

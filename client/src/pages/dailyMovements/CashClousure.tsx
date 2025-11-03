@@ -32,6 +32,7 @@ const notifyError = (msg: string) => toast.error(msg);
 
 const CashClousureView = () => {
   const [closedBalances, setClosedBalances] = useState<IDailyBalanceIds[]>([]);
+  const [refresh, setRefresh] = useState(false);
   const [showCerrarCajaPopup, setShowCerrarCajaPopup] = useState(false);
   const [payments, setPayments] = useState<IPayment[]>([]);
   const [withdrawals, setWithdrawals] = useState<IWithdrawal[]>([]);
@@ -98,19 +99,17 @@ const CashClousureView = () => {
           selectedBalanceId.identificationNumber
         )) as ICloseDailyBalanceResponse;
         setSelectedBalance(balanceData.balance);
-        setPayments(balanceData.payments);
+        setPayments([...balanceData.payments]);
         setWithdrawals(balanceData.withdrawals);
       } catch (error) {
         notifyError("Error al cargar el balance seleccionado");
       }
     };
     fetchBalance();
-  }, [selectedBalanceId]);
+  }, [selectedBalanceId, refresh]);
 
   useEffect(() => {
-    if (payments.length || withdrawals.length) {
-      calculateTotalsPaymentMethod();
-    }
+    calculateTotalsPaymentMethod();
   }, [payments, withdrawals]);
 
   const calculateTotalsPaymentMethod = () => {
@@ -170,6 +169,7 @@ const CashClousureView = () => {
         type: "",
         reason: "",
       });
+      setRefresh(!refresh);
     }
   };
 
@@ -185,13 +185,14 @@ const CashClousureView = () => {
       const res = await closeBalance(realAmountCash, realAmountTransfer);
       if (res.ack) {
         notifyError(res.message ? res.message : "error");
+        setShowCerrarCajaPopup(false);
       } else {
         notify(res.message ? res.message : "ok");
+        setShowCerrarCajaPopup(false);
+        setRefresh(!refresh);
       }
     } catch (error) {
       notifyError("Error al cerrar el balance");
-    } finally {
-      setShowCerrarCajaPopup(false);
     }
   };
   const getEstadoBadge = (estado: string) => {
@@ -451,10 +452,7 @@ const CashClousureView = () => {
                     </span>
                     <span className="font-semibold text-green-600">
                       {formatCurrency(
-                        selectedBalance.state === "closed"
-                          ? selectedBalance.finalAmountCash +
-                              selectedBalance.finalAmountTransfer
-                          : partialPaymentAmount
+                        totalMethod.reduce((acc, curr) => acc + curr.total, 0)
                       )}
                     </span>
                   </div>
@@ -1018,7 +1016,7 @@ const CashClousureView = () => {
               </div>
             </div>
 
-            <form onSubmit={closeBalanceHandle} className="space-y-4">
+            <form className="space-y-4">
               {/* Monto Final Contado */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1099,8 +1097,9 @@ const CashClousureView = () => {
                 <p className="text-xs text-gray-500 mt-1">
                   Monto esperado:{" "}
                   {formatCurrency(
-                    totalPartialAmount("transferencia") +
-                      selectedBalance.initialAmountTransfer
+                    selectedBalance.state === "pending"
+                      ? totalPartialAmount("transferencia")
+                      : selectedBalance.finalAmountTransfer
                   )}
                 </p>
               </div>

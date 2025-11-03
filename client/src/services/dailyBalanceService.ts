@@ -67,7 +67,7 @@ export const getClosedBalances = async () => {
 };
 export const closeBalance = async (
   realAmountCash: number,
-  realAmountTranfer: number
+  realAmountTransfer: number
 ) => {
   try {
     const res = await fetch(`${URL_API}/daily-balance/close`, {
@@ -76,7 +76,7 @@ export const closeBalance = async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ realAmountCash, realAmountTranfer }),
+      body: JSON.stringify({ realAmountCash, realAmountTransfer }),
     });
     if (res.status === 401) unauthorized();
     const response: ResponseApi<String> = await res.json();
