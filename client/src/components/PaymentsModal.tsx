@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X, Plus, Trash2, Search } from "lucide-react";
+import { X, Plus, Trash2, Search, AlertTriangle } from "lucide-react";
 import SearchableSelect from "../components/SearchableSelect";
 import { IClient } from "../interfaces/client";
 import { IMovement } from "../interfaces/movement";
@@ -11,6 +11,7 @@ import { IPaymentMethod } from "../interfaces/paymentMethod";
 import { IPayment } from "../interfaces/payment";
 import toast, { Toaster } from "react-hot-toast";
 import { createMovement, updateMovement } from "../services/movementService";
+import { StockValidationWarning } from "../interfaces/stockMovement";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
@@ -48,6 +49,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [stockWarnings, setStockWarnings] = useState<StockValidationWarning[]>([]);
+  const [showStockWarningModal, setShowStockWarningModal] = useState(false);
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -189,6 +192,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     setCart([]);
     setPaymentMethods([]);
     setIsPaid(false);
+    setStockWarnings([]);
     setMovement({
       date: "",
       details: [],
@@ -199,7 +203,41 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     });
   };
 
-  const handleFinalizeSale = async () => {
+  // Verificar stock de los items en el carrito
+  const checkStockWarnings = (): StockValidationWarning[] => {
+    const warnings: StockValidationWarning[] = [];
+    for (const item of cart) {
+      const product = products.find((p) => p._id === item._id);
+      if (product) {
+        const available = product.stock || 0;
+        const requested = item.units || 1;
+        if (requested > available) {
+          warnings.push({
+            productId: item._id || "",
+            productName: item.name,
+            requested,
+            available,
+            hasWarning: true,
+          });
+        }
+      }
+    }
+    return warnings;
+  };
+
+  // Obtener stock disponible de un producto
+  const getProductStock = (productId: string): number => {
+    const product = products.find((p) => p._id === productId);
+    return product?.stock || 0;
+  };
+
+  // Verificar si un item en el carrito excede el stock
+  const hasStockWarning = (item: IProduct): boolean => {
+    const available = getProductStock(item._id || "");
+    return item.units > available;
+  };
+
+  const handleFinalizeSale = async (skipWarnings: boolean = false) => {
     if (cart.length === 0) {
       alert("El carrito está vacío");
       return;
@@ -208,6 +246,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       alert("Agrega al menos un medio de pago");
       return;
     }
+
+    // Verificar stock si no estamos editando y no se saltaron las advertencias
+    if (!isEdit && !skipWarnings) {
+      const warnings = checkStockWarnings();
+      if (warnings.length > 0) {
+        setStockWarnings(warnings);
+        setShowStockWarningModal(true);
+        return;
+      }
+    }
+
     try {
       let res;
       // Agregar los detalles y total
@@ -229,6 +278,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     } catch (error) {
       notifyError(error ? error.toString() : "error");
     }
+  };
+
+  const handleConfirmWithWarnings = () => {
+    setShowStockWarningModal(false);
+    handleFinalizeSale(true);
   };
   const clientHandler = (val: string) => {
     setMovement({ ...movement, client: val });
@@ -309,10 +363,25 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               {cart.map((item) => (
                 <div
                   key={item._id}
-                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+                  className={`flex items-center gap-4 p-4 rounded-lg ${
+                    hasStockWarning(item)
+                      ? "bg-orange-50 border border-orange-200"
+                      : "bg-gray-50"
+                  }`}
                 >
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{item.name}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-500">
+                        Stock: {getProductStock(item._id || "")}
+                      </span>
+                      {hasStockWarning(item) && (
+                        <span className="flex items-center gap-1 text-xs text-orange-600">
+                          <AlertTriangle className="h-3 w-3" />
+                          Stock insuficiente
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -421,7 +490,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   Cancelar venta
                 </button>
                 <button
-                  onClick={handleFinalizeSale}
+                  onClick={() => handleFinalizeSale()}
                   className="flex-1 w-full bg-[#34A853] text-white py-3 rounded-lg hhover:bg-green-800  transition-colors"
                 >
                   Finalizar venta
@@ -480,6 +549,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                         </h4>
                         <p className="text-sm text-gray-600 mt-1">
                           {product.description}
+                        </p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            product.stock > 0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          Stock: {product.stock || 0}
                         </p>
                       </div>
                       <span className="font-semibold text-gray-900">
@@ -621,6 +699,58 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
         </div>
       )}
+      {/* Modal de advertencia de stock */}
+      {showStockWarningModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-orange-100 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">
+                Advertencia de Stock
+              </h3>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Los siguientes productos tienen stock insuficiente:
+            </p>
+
+            <div className="space-y-2 mb-6">
+              {stockWarnings.map((warning) => (
+                <div
+                  key={warning.productId}
+                  className="flex justify-between items-center p-3 bg-orange-50 rounded-lg"
+                >
+                  <span className="font-medium text-gray-900">
+                    {warning.productName}
+                  </span>
+                  <span className="text-sm text-orange-700">
+                    Solicitado: {warning.requested} / Disponible:{" "}
+                    {warning.available}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowStockWarningModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmWithWarnings}
+                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+              >
+                Continuar de todos modos
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Toaster position="bottom-right" />
     </div>
   );

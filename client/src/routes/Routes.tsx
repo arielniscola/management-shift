@@ -12,6 +12,9 @@ import DailyMovements from "../pages/dailyMovements/DailyMovements";
 import ShiftStatistics from "../pages/statistics/ShiftStatistics";
 import Unauthorized from "../pages/unauthorized";
 import { ShiftView } from "../pages/shift";
+import Stock from "../pages/Stock/Stock";
+import OpenTab from "../pages/OpenTab/OpenTab";
+import OpenTabDetail from "../pages/OpenTab/OpenTabDetail";
 
 export const router = createBrowserRouter([
   {
@@ -96,6 +99,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ShiftStatistics />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/stock",
+        element: (
+          <ProtectedRoute>
+            <Stock />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/open-tab",
+        element: (
+          <ProtectedRoute>
+            <OpenTab />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/open-tab/:id",
+        element: (
+          <ProtectedRoute>
+            <OpenTabDetail />
           </ProtectedRoute>
         ),
       },

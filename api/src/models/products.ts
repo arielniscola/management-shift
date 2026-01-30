@@ -6,8 +6,9 @@ export interface IProduct {
   name: string;
   description: string;
   price: number;
-  units: Number;
+  units: number;
   stock: number;
+  minimumStock: number;
   companyCode: string;
 }
 
@@ -40,6 +41,12 @@ export const ProductSchema = createSchema<IProduct>(
     stock: {
       type: Number,
       required: false,
+      default: 0,
+    },
+    minimumStock: {
+      type: Number,
+      required: false,
+      default: 0,
     },
   },
   {

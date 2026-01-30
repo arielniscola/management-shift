@@ -10,6 +10,8 @@ import { UnitBusinessController } from "./controllers/unitBusiness";
 import UserController from "./controllers/user";
 import { AuthenticationController } from "./controllers/authentication";
 import { PaymentController } from "./controllers/payment";
+import { StockController } from "./controllers/stock";
+import { OpenTabController } from "./controllers/openTab";
 
 /**
  * Declaracion de Rutas.
@@ -313,6 +315,155 @@ const routes = defineRoutes([
         label: "Pagos",
         method: "delete",
         controller: PaymentController.delete,
+        auth: true,
+      },
+      // Stock
+      {
+        path: "/stock/movements",
+        label: "Movimientos de Stock",
+        method: "get",
+        controller: StockController.getMovements,
+        auth: true,
+      },
+      {
+        path: "/stock/movements/paginated",
+        label: "Movimientos de Stock Paginados",
+        method: "get",
+        controller: StockController.getMovementsPaginated,
+        auth: true,
+      },
+      {
+        path: "/stock/daily-sales",
+        label: "Ventas Diarias",
+        method: "get",
+        controller: StockController.getDailySales,
+        auth: true,
+      },
+      {
+        path: "/stock/low",
+        label: "Stock Bajo",
+        method: "get",
+        controller: StockController.getLowStock,
+        auth: true,
+      },
+      {
+        path: "/stock/entry",
+        label: "Entrada de Stock",
+        method: "post",
+        controller: StockController.registerEntry,
+        auth: true,
+      },
+      {
+        path: "/stock/adjustment",
+        label: "Ajuste de Stock",
+        method: "post",
+        controller: StockController.adjustment,
+        auth: true,
+      },
+      {
+        path: "/stock/validate",
+        label: "Validar Stock",
+        method: "post",
+        controller: StockController.validateStock,
+        auth: true,
+      },
+      // Open Tab (Cuentas Abiertas)
+      {
+        path: "/open-tab",
+        label: "Listar Cuentas Abiertas",
+        method: "get",
+        controller: OpenTabController.find,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id",
+        label: "Detalle Cuenta Abierta",
+        method: "get",
+        controller: OpenTabController.findOne,
+        auth: true,
+      },
+      {
+        path: "/open-tab",
+        label: "Crear Cuenta Abierta",
+        method: "post",
+        controller: OpenTabController.create,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/product",
+        label: "Agregar Producto a Cuenta",
+        method: "post",
+        controller: OpenTabController.addProduct,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/product/:index",
+        label: "Eliminar Producto de Cuenta",
+        method: "delete",
+        controller: OpenTabController.removeProduct,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/product/:index",
+        label: "Actualizar Cantidad Producto",
+        method: "put",
+        controller: OpenTabController.updateProductUnits,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/divide/equal",
+        label: "Dividir Cuenta Equitativa",
+        method: "post",
+        controller: OpenTabController.divideEqual,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/divide/by-products",
+        label: "Dividir Cuenta por Productos",
+        method: "post",
+        controller: OpenTabController.divideByProducts,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/participant/:participantId/product",
+        label: "Agregar Producto a Participante",
+        method: "post",
+        controller: OpenTabController.addProductToParticipant,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/participant/:participantId/product/:productIndex",
+        label: "Eliminar Producto de Participante",
+        method: "delete",
+        controller: OpenTabController.removeProductFromParticipant,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/transfer",
+        label: "Transferir Producto",
+        method: "put",
+        controller: OpenTabController.transferProduct,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/pay/:participantId",
+        label: "Registrar Pago Participante",
+        method: "post",
+        controller: OpenTabController.registerPayment,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id/close",
+        label: "Cerrar Cuenta",
+        method: "post",
+        controller: OpenTabController.closeTab,
+        auth: true,
+      },
+      {
+        path: "/open-tab/:id",
+        label: "Cancelar Cuenta",
+        method: "delete",
+        controller: OpenTabController.cancelTab,
         auth: true,
       },
     ],

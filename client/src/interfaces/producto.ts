@@ -6,5 +6,6 @@ export interface IProduct {
   price: number;
   units: number;
   companyCode?: string;
-  stock: string;
+  stock: number;
+  minimumStock: number;
 }

@@ -16,6 +16,8 @@ export interface IMovement {
   client: string | IClient;
   amountPaid: number;
   identifacationNumber?: string;
+  openTabId?: string;
+  openTabName?: string;
 }
 
 const MovementSchema = createSchema<IMovement>({
@@ -60,6 +62,14 @@ const MovementSchema = createSchema<IMovement>({
     default: 0,
   },
   identifacationNumber: {
+    type: String,
+    required: false,
+  },
+  openTabId: {
+    type: String,
+    required: false,
+  },
+  openTabName: {
     type: String,
     required: false,
   },

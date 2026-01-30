@@ -5,6 +5,7 @@ import { IRouteController } from "../routes/index";
 import { movementService } from "../services/movements";
 import { IPayment } from "../models/payment";
 import { paymentService } from "../services/payment";
+import { stockService } from "../services/stock";
 
 export class MovementController {
   static find: IRouteController<{}, {}, {}, { date: string; client: string }> =
@@ -74,6 +75,16 @@ export class MovementController {
 
       const created = await movementService.insertOne(movement);
       if (!created) throw new Error("No se creo la venta");
+
+      // Descontar stock de los productos vendidos
+      if (movement.details && movement.details.length > 0) {
+        await stockService.processSaleStock(
+          movement.details,
+          companyCode,
+          movement.identifacationNumber
+        );
+      }
+
       return res
         .status(200)
         .json({ ack: 0, message: "Se creo la venta correctamente" });
@@ -131,6 +142,21 @@ export class MovementController {
     const logger = new Log(res.locals.requestId, "MovementController.delete");
     try {
       const id = req.params.id;
+      const companyCode = res.locals.companyCode;
+
+      // Obtener la venta antes de eliminarla para revertir el stock
+      const movement = await movementService.findOne({ _id: id });
+      if (!movement) throw new Error("Venta no encontrada");
+
+      // Revertir el stock de los productos
+      if (movement.details && movement.details.length > 0) {
+        await stockService.revertSaleStock(
+          movement.details,
+          companyCode,
+          movement.identifacationNumber
+        );
+      }
+
       const deleted = await movementService.deleteOne({
         _id: id,
       });

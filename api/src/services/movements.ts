@@ -13,7 +13,7 @@ export class MovementService extends Service<IMovement> {
       {},
       { sort: { _id: -1 } }
     );
-    const lastIdentificationNumber = lastMovement.identifacationNumber
+    const lastIdentificationNumber = lastMovement?.identifacationNumber
       ? parseInt(lastMovement.identifacationNumber)
       : 0;
     let newIdentificationNumber = (lastIdentificationNumber + 1).toString();

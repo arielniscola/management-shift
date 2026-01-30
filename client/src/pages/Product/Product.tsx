@@ -8,9 +8,10 @@ import {
   getProducts,
   updateProduct,
 } from "../../services/productService";
+import { registerStockEntry } from "../../services/stockService";
 import ModalDelete from "../../components/DeleteModal";
 import toast, { Toaster } from "react-hot-toast";
-import { PackageSearch, Pencil, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, PackageSearch, Pencil, Plus, Search, Trash2 } from "lucide-react";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
@@ -29,9 +30,17 @@ const Product = () => {
     name: "",
     price: 0,
     code: "",
-    stock: "",
+    stock: 0,
     description: "",
     units: 0,
+    minimumStock: 0,
+  });
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [stockEntry, setStockEntry] = useState({
+    productId: "",
+    productName: "",
+    quantity: 0,
+    notes: "",
   });
 
   useEffect(() => {
@@ -53,12 +62,50 @@ const Product = () => {
         name: "",
         price: 0,
         code: "",
-        stock: "",
+        stock: 0,
         description: "",
         units: 0,
+        minimumStock: 0,
       });
     }
   }, [showModal]);
+
+  const handleStockEntry = (product: IProduct) => {
+    setStockEntry({
+      productId: product._id || "",
+      productName: product.name,
+      quantity: 0,
+      notes: "",
+    });
+    setShowStockModal(true);
+  };
+
+  const submitStockEntry = async () => {
+    try {
+      if (stockEntry.quantity <= 0) {
+        notifyError("La cantidad debe ser mayor a 0");
+        return;
+      }
+      const res = await registerStockEntry(
+        stockEntry.productId,
+        stockEntry.quantity,
+        stockEntry.notes
+      );
+      if (!res.ack) {
+        notify(res.message || "Entrada registrada");
+        setShowStockModal(false);
+        setResearch(!research);
+      } else {
+        notifyError(res.message || "Error");
+      }
+    } catch (error) {
+      notifyError(error ? error.toString() : "Error");
+    }
+  };
+
+  const isLowStock = (product: IProduct) => {
+    return product.minimumStock > 0 && product.stock < product.minimumStock;
+  };
 
   const handleUpdate = (id?: string) => {
     const unit = products.find((u) => u._id === id);
@@ -191,12 +238,30 @@ const Product = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                {prod.stock}
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`text-sm font-medium ${
+                                    isLowStock(prod)
+                                      ? "text-red-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  {prod.stock}
+                                </span>
+                                {isLowStock(prod) && (
+                                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                                )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-3">
+                                <button
+                                  onClick={() => handleStockEntry(prod)}
+                                  className="text-green-600 hover:text-green-900 transition-colors"
+                                  title="Agregar stock"
+                                >
+                                  <Plus className="h-5 w-5" />
+                                </button>
                                 <button
                                   onClick={() => handleUpdate(prod._id)}
                                   className="text-indigo-600 hover:text-indigo-900 transition-colors"
@@ -235,12 +300,30 @@ const Product = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {prod.stock}
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`text-sm font-medium ${
+                                    isLowStock(prod)
+                                      ? "text-red-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  {prod.stock}
+                                </span>
+                                {isLowStock(prod) && (
+                                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                                )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-3">
+                                <button
+                                  onClick={() => handleStockEntry(prod)}
+                                  className="text-green-600 hover:text-green-900 transition-colors"
+                                  title="Agregar stock"
+                                >
+                                  <Plus className="h-5 w-5" />
+                                </button>
                                 <button
                                   onClick={() => handleUpdate(prod._id)}
                                   className="text-indigo-600 hover:text-indigo-900 transition-colors"
@@ -342,13 +425,29 @@ const Product = () => {
                           Stock
                         </label>
                         <input
-                          type="text"
+                          type="number"
                           required
                           value={formData.stock}
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              stock: e.target.value,
+                              stock: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Stock Minimo
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.minimumStock}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              minimumStock: parseFloat(e.target.value) || 0,
                             })
                           }
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
@@ -382,6 +481,68 @@ const Product = () => {
             setModalOpen={setDeleteModalOpen}
             deleteFn={deleteHandler}
           />
+
+          {showStockModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-md w-full">
+                <h2 className="text-2xl font-bold mb-4">
+                  Entrada de Stock - {stockEntry.productName}
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Cantidad
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={stockEntry.quantity}
+                      onChange={(e) =>
+                        setStockEntry({
+                          ...stockEntry,
+                          quantity: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Notas (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={stockEntry.notes}
+                      onChange={(e) =>
+                        setStockEntry({
+                          ...stockEntry,
+                          notes: e.target.value,
+                        })
+                      }
+                      placeholder="Ej: Compra proveedor X"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowStockModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                      onClick={submitStockEntry}
+                    >
+                      Registrar Entrada
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
       <Toaster position="bottom-right" />
