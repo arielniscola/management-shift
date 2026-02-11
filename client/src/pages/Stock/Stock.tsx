@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sidebar } from "../../partials/sidebar";
 import Header from "../../partials/headers";
 import { IProduct } from "../../interfaces/producto";
@@ -10,7 +11,10 @@ import {
   adjustStock,
   getDailySales,
   DailySaleItem,
+  getStockSummary,
+  StockSummary,
 } from "../../services/stockService";
+import { validateSuperAdminPassword } from "../../services/companyService";
 import { getProducts } from "../../services/productService";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -20,16 +24,20 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  DollarSign,
+  Lock,
   Package,
   Plus,
   RefreshCw,
   ShoppingCart,
+  Boxes,
 } from "lucide-react";
 
 const notify = (msg: string) => toast.success(msg);
 const notifyError = (msg: string) => toast.error(msg);
 
 const Stock = () => {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [movements, setMovements] = useState<IStockMovement[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<IProduct[]>([]);
@@ -46,6 +54,19 @@ const Stock = () => {
     type: "entry" as "entry" | "adjustment",
   });
 
+  // Auth state
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Stock summary state
+  const [stockSummary, setStockSummary] = useState<StockSummary>({
+    totalProducts: 0,
+    totalUnits: 0,
+    totalValue: 0,
+  });
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -54,14 +75,16 @@ const Stock = () => {
 
   // Daily sales state
   const [dailySalesDate, setDailySalesDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toLocaleDateString("en-CA")
   );
   const [dailySales, setDailySales] = useState<DailySaleItem[]>([]);
   const [loadingDailySales, setLoadingDailySales] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthorized) {
+      fetchData();
+    }
+  }, [isAuthorized]);
 
   useEffect(() => {
     if (activeTab === "movements") {
@@ -78,16 +101,18 @@ const Stock = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [movementsResult, lowStockData, productsData] = await Promise.all([
+      const [movementsResult, lowStockData, productsData, summaryData] = await Promise.all([
         getStockMovementsPaginated(1, pageSize),
         getLowStockProducts(),
         getProducts(),
+        getStockSummary(),
       ]);
       setMovements(movementsResult.movements || []);
       setTotalPages(movementsResult.pages);
       setTotalMovements(movementsResult.total);
       setLowStockProducts(lowStockData || []);
       setProducts((productsData as IProduct[]) || []);
+      setStockSummary(summaryData);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -166,6 +191,31 @@ const Stock = () => {
     }
   };
 
+  const handlePasswordSubmit = async () => {
+    setAuthLoading(true);
+    setAuthError("");
+    try {
+      const res = await validateSuperAdminPassword(passwordInput);
+      if (res.ack === 0) {
+        setIsAuthorized(true);
+        fetchData();
+      } else {
+        setAuthError(res.message || "Contraseña incorrecta");
+      }
+    } catch (error) {
+      setAuthError("Error al validar la contraseña");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
+    }).format(price);
+  };
+
   const getMovementTypeLabel = (type: string) => {
     switch (type) {
       case "sale":
@@ -210,6 +260,58 @@ const Stock = () => {
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main>
+          {/* Password Modal */}
+          {!isAuthorized && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-sm w-full">
+                <div className="flex flex-col items-center mb-6">
+                  <div className="p-3 bg-indigo-100 rounded-full mb-4">
+                    <Lock className="h-8 w-8 text-indigo-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Acceso Restringido
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1 text-center">
+                    Ingresa la contraseña de super admin para acceder al stock
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <input
+                      type="password"
+                      value={passwordInput}
+                      onChange={(e) => setPasswordInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handlePasswordSubmit();
+                      }}
+                      placeholder="Contraseña"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400"
+                      autoFocus
+                    />
+                  </div>
+                  {authError && (
+                    <p className="text-sm text-red-600 text-center">
+                      {authError}
+                    </p>
+                  )}
+                  <button
+                    onClick={handlePasswordSubmit}
+                    disabled={authLoading || !passwordInput}
+                    className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {authLoading ? "Verificando..." : "Ingresar"}
+                  </button>
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="w-full text-gray-500 hover:text-gray-700 py-2 text-sm transition-colors"
+                  >
+                    Volver
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="min-h-screen bg-gray-100 p-8">
             <div className="mx-auto">
               <div className="flex justify-between items-center mb-8">
@@ -224,6 +326,85 @@ const Stock = () => {
                   Nueva Entrada
                 </button>
               </div>
+
+              {/* Summary Cards */}
+              {isAuthorized && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {activeTab === "dailySales" ? (
+                    <>
+                      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4">
+                        <div className="p-3 bg-blue-100 rounded-full">
+                          <Package className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Productos Vendidos</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {dailySales.length}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4">
+                        <div className="p-3 bg-red-100 rounded-full">
+                          <ShoppingCart className="h-6 w-6 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Unidades Vendidas</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {dailySales.reduce((sum, item) => sum + item.totalQuantity, 0)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4">
+                        <div className="p-3 bg-green-100 rounded-full">
+                          <DollarSign className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Valor Total Vendido</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {formatPrice(dailySales.reduce((sum, item) => sum + item.totalValue, 0))}
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4">
+                        <div className="p-3 bg-blue-100 rounded-full">
+                          <Package className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Total Productos</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {stockSummary.totalProducts}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4">
+                        <div className="p-3 bg-green-100 rounded-full">
+                          <Boxes className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Total Unidades en Stock</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {stockSummary.totalUnits}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4">
+                        <div className="p-3 bg-purple-100 rounded-full">
+                          <DollarSign className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Valor Total del Inventario</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {formatPrice(stockSummary.totalValue)}
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Tabs */}
               <div className="flex gap-4 mb-6 flex-wrap">
@@ -408,7 +589,7 @@ const Stock = () => {
                           className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400"
                         />
                         <button
-                          onClick={() => setDailySalesDate(new Date().toISOString().split("T")[0])}
+                          onClick={() => setDailySalesDate(new Date().toLocaleDateString("en-CA"))}
                           className="px-3 py-2 text-sm text-indigo-600 hover:text-indigo-800"
                         >
                           Hoy

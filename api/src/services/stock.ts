@@ -1,6 +1,7 @@
 import { Service } from ".";
 import { IProduct, ProductModel } from "../models/products";
 import { IStockMovement, StockMovementModel } from "../models/stockMovement";
+import { MovementModel } from "../models/movements";
 
 export interface StockValidationResult {
   productId: string;
@@ -231,6 +232,7 @@ export class StockService extends Service<IStockMovement> {
     productName: string;
     productCode: string;
     totalQuantity: number;
+    totalValue: number;
     movements: number;
   }>> {
     const startOfDay = new Date(date);
@@ -239,39 +241,30 @@ export class StockService extends Service<IStockMovement> {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const result = await StockMovementModel.aggregate([
+    const result = await MovementModel.aggregate([
       {
         $match: {
           companyCode,
-          type: "sale",
           date: { $gte: startOfDay, $lte: endOfDay },
         },
       },
+      { $unwind: "$details" },
       {
         $group: {
-          _id: "$product",
-          totalQuantity: { $sum: { $abs: "$quantity" } },
+          _id: { code: "$details.code", name: "$details.name" },
+          totalQuantity: { $sum: "$details.units" },
+          totalValue: { $sum: { $multiply: ["$details.price", "$details.units"] } },
           movements: { $sum: 1 },
         },
       },
       {
-        $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "_id",
-          as: "productInfo",
-        },
-      },
-      {
-        $unwind: "$productInfo",
-      },
-      {
         $project: {
           _id: 0,
-          productId: "$_id",
-          productName: "$productInfo.name",
-          productCode: "$productInfo.code",
+          productId: "$_id.code",
+          productName: "$_id.name",
+          productCode: "$_id.code",
           totalQuantity: 1,
+          totalValue: 1,
           movements: 1,
         },
       },
@@ -281,6 +274,35 @@ export class StockService extends Service<IStockMovement> {
     ]);
 
     return result;
+  }
+
+  /**
+   * Obtiene el resumen de stock: total productos, unidades y valor
+   */
+  async getStockSummary(
+    companyCode: string
+  ): Promise<{ totalProducts: number; totalUnits: number; totalValue: number }> {
+    const result = await ProductModel.aggregate([
+      { $match: { companyCode } },
+      {
+        $group: {
+          _id: null,
+          totalProducts: { $sum: 1 },
+          totalUnits: { $sum: "$stock" },
+          totalValue: { $sum: { $multiply: ["$stock", "$price"] } },
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return { totalProducts: 0, totalUnits: 0, totalValue: 0 };
+    }
+
+    return {
+      totalProducts: result[0].totalProducts,
+      totalUnits: result[0].totalUnits,
+      totalValue: result[0].totalValue,
+    };
   }
 
   /**

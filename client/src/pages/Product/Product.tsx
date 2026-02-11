@@ -34,6 +34,7 @@ const Product = () => {
     description: "",
     units: 0,
     minimumStock: 0,
+    excludeFromAccounting: false,
   });
   const [showStockModal, setShowStockModal] = useState(false);
   const [stockEntry, setStockEntry] = useState({
@@ -66,6 +67,7 @@ const Product = () => {
         description: "",
         units: 0,
         minimumStock: 0,
+        excludeFromAccounting: false,
       });
     }
   }, [showModal]);
@@ -223,8 +225,15 @@ const Product = () => {
                       ? products.map((prod) => (
                           <tr key={prod._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                {prod.name}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-500">
+                                  {prod.name}
+                                </span>
+                                {prod.excludeFromAccounting && (
+                                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                                    No contabiliza
+                                  </span>
+                                )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -285,8 +294,15 @@ const Product = () => {
                       : filterData.map((prod) => (
                           <tr key={prod._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-500">
-                                {prod.name}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-500">
+                                  {prod.name}
+                                </span>
+                                {prod.excludeFromAccounting && (
+                                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                                    No contabiliza
+                                  </span>
+                                )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -452,6 +468,27 @@ const Product = () => {
                           }
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border"
                         />
+                      </div>
+                      <div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.excludeFromAccounting || false}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                excludeFromAccounting: e.target.checked,
+                              })
+                            }
+                            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                          />
+                          <span className="text-sm font-medium text-gray-700">
+                            No contabilizar en caja/stock
+                          </span>
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1 ml-6">
+                          Al marcar esta opcion, el producto no descontara stock ni sumara a la caja al venderse
+                        </p>
                       </div>
                       <div className="flex justify-end space-x-3">
                         <button

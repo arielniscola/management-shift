@@ -8,6 +8,7 @@ export interface ICompany {
   type: string;
   cellphone: string;
   active: boolean;
+  superAdminPassword: string;
 }
 
 const CompanySchema = createSchema<ICompany>({
@@ -39,6 +40,11 @@ const CompanySchema = createSchema<ICompany>({
     type: Boolean,
     required: true,
     default: true,
+  },
+  superAdminPassword: {
+    type: String,
+    required: false,
+    default: "1234",
   },
 });
 

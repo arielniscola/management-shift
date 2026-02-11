@@ -10,6 +10,7 @@ export interface IProduct {
   stock: number;
   minimumStock: number;
   companyCode: string;
+  excludeFromAccounting?: boolean;
 }
 
 export const ProductSchema = createSchema<IProduct>(
@@ -47,6 +48,11 @@ export const ProductSchema = createSchema<IProduct>(
       type: Number,
       required: false,
       default: 0,
+    },
+    excludeFromAccounting: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   {

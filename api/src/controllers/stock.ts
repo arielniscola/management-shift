@@ -5,6 +5,23 @@ import { stockService } from "../services/stock";
 
 export class StockController {
   /**
+   * Obtener resumen de stock
+   * GET /stock/summary
+   */
+  static getStockSummary: IRouteController = async (req, res) => {
+    const logger = new Log(res.locals.requestId, "StockController.getStockSummary");
+    try {
+      const companyCode = res.locals.companyCode;
+      const summary = await stockService.getStockSummary(companyCode);
+
+      return res.status(200).json({ ack: 0, data: summary });
+    } catch (e) {
+      logger.error(e);
+      return res.status(400).json({ ack: 1, message: e.message });
+    }
+  };
+
+  /**
    * Obtener historial de movimientos de stock
    * GET /stock/movements
    */

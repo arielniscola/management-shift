@@ -115,7 +115,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     }
     setCart(
       cart.map((item) =>
-        item.code === productCode ? { ...item, quantity } : item
+        item.code === productCode ? { ...item, units: quantity } : item
       )
     );
   };
@@ -167,11 +167,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   const changeUnitButton = (sum: boolean, id: string) => {
     const val = sum ? 1 : -1;
-    const updatedDetails = [...cart];
     const index = cart.findIndex((item) => item._id === id);
-    updatedDetails[index].units += val;
-    if (updatedDetails[index].units < 1) return;
-    setCart(updatedDetails);
+    const newUnits = cart[index].units + val;
+    if (newUnits < 1) return;
+    setCart(
+      cart.map((item, i) =>
+        i === index ? { ...item, units: newUnits } : item
+      )
+    );
   };
 
   const formatPrice = (price: number) => {
@@ -445,16 +448,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600">$</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1000"
-                        value={item.price}
-                        onChange={(e) =>
-                          updatePrice(item.code, Number(e.target.value))
-                        }
-                        className="w-28 p-1 border border-gray-300 rounded text-sm"
-                      />
+                      <span className="w-28 p-1 text-sm text-gray-900">
+                        {formatPrice(item.price)}
+                      </span>
                     </div>
 
                     <div className="w-32 text-right font-medium text-gray-900">

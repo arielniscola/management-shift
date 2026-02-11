@@ -149,20 +149,7 @@ export class OpenTabService extends Service<IOpenTab> {
       participants: newParticipants,
     });
 
-    // Descontar stock al dividir (los productos ya fueron "consumidos")
-    if (tab.sharedProducts.length > 0) {
-      await stockService.processSaleStock(
-        tab.sharedProducts
-          .filter((p) => p.productId)  // Solo productos con ID real
-          .map((p) => ({
-            _id: p.productId,
-            units: p.units,
-            name: p.name,
-          })),
-        companyCode,
-        `OpenTab-${tabId}`
-      );
-    }
+    // El stock se descuenta al cerrar la cuenta (closeTab)
 
     return this.findOne({ _id: tabId });
   }
@@ -216,20 +203,7 @@ export class OpenTabService extends Service<IOpenTab> {
       participants: newParticipants,
     });
 
-    // Descontar stock al dividir (los productos ya fueron "consumidos")
-    if (tab.sharedProducts.length > 0) {
-      await stockService.processSaleStock(
-        tab.sharedProducts
-          .filter((p) => p.productId)  // Solo productos con ID real
-          .map((p) => ({
-            _id: p.productId,
-            units: p.units,
-            name: p.name,
-          })),
-        companyCode,
-        `OpenTab-${tabId}`
-      );
-    }
+    // El stock se descuenta al cerrar la cuenta (closeTab)
 
     return this.findOne({ _id: tabId });
   }
@@ -296,14 +270,7 @@ export class OpenTabService extends Service<IOpenTab> {
       totalAmount: tab.totalAmount,
     });
 
-    // Descontar stock del producto agregado post-división
-    if (product.productId) {
-      await stockService.processSaleStock(
-        [{ _id: product.productId, units: product.units, name: product.name }],
-        companyCode,
-        `OpenTab-${tabId}`
-      );
-    }
+    // El stock se descuenta al cerrar la cuenta (closeTab)
 
     return this.findOne({ _id: tabId });
   }
@@ -367,14 +334,7 @@ export class OpenTabService extends Service<IOpenTab> {
       totalAmount: tab.totalAmount,
     });
 
-    // Revertir stock del producto eliminado
-    if (product.productId) {
-      await stockService.revertSaleStock(
-        [{ _id: product.productId, units: product.units }],
-        companyCode,
-        `OpenTab-${tabId}-revert`
-      );
-    }
+    // El stock se descuenta al cerrar la cuenta (closeTab)
 
     return this.findOne({ _id: tabId });
   }
@@ -506,7 +466,10 @@ export class OpenTabService extends Service<IOpenTab> {
     const generatedMovements: string[] = [];
 
     // Generar un movement por cada participante
-    for (const participant of tab.participants) {
+    const participantCount = tab.participants.length;
+
+    for (let i = 0; i < tab.participants.length; i++) {
+      const participant = tab.participants[i];
       const identificationNumber = await movementService.generateMovementNumber(companyCode);
 
       // Determinar los productos para el movement
@@ -523,18 +486,25 @@ export class OpenTabService extends Service<IOpenTab> {
           companyCode,
         }));
       } else {
-        // División equitativa: todos los productos divididos
-        const participantCount = tab.participants.length;
-        details = tab.sharedProducts.map((p) => ({
-          code: p.code,
-          name: p.name,
-          price: Math.round(p.price / participantCount),
-          units: p.units,
-          description: "",
-          stock: 0,
-          minimumStock: 0,
-          companyCode,
-        }));
+        // División equitativa: dividir unidades proporcionalmente entre participantes
+        // para evitar que los reportes inflen la cantidad de productos vendidos
+        details = tab.sharedProducts.map((p) => {
+          const baseUnits = Math.floor(p.units / participantCount);
+          const remainder = p.units % participantCount;
+          // Los primeros 'remainder' participantes reciben 1 unidad extra
+          const participantUnits = baseUnits + (i < remainder ? 1 : 0);
+
+          return {
+            code: p.code,
+            name: p.name,
+            price: p.price,
+            units: participantUnits,
+            description: "",
+            stock: 0,
+            minimumStock: 0,
+            companyCode,
+          };
+        }).filter((d) => d.units > 0);
       }
 
       const movement = await movementService.insertOne({
@@ -547,6 +517,8 @@ export class OpenTabService extends Service<IOpenTab> {
         client: participant.clientId || undefined,
         amountPaid: participant.subtotal,
         identifacationNumber: identificationNumber,
+        openTabId: tabId,
+        openTabName: tab.name,
       });
 
       generatedMovements.push(movement._id.toString());
@@ -565,7 +537,45 @@ export class OpenTabService extends Service<IOpenTab> {
       }
     }
 
-    // Nota: El stock ya fue descontado al momento de dividir la cuenta
+    // Descontar stock al generar las ventas
+    // Recopilar todos los productos: sharedProducts + productos individuales post-división
+    const productsForStock = new Map<string, { _id: string; units: number; name: string }>();
+
+    for (const p of tab.sharedProducts) {
+      if (p.productId) {
+        const existing = productsForStock.get(p.productId);
+        if (existing) {
+          existing.units += p.units;
+        } else {
+          productsForStock.set(p.productId, { _id: p.productId, units: p.units, name: p.name });
+        }
+      }
+    }
+
+    // Para división equitativa, incluir productos agregados a participantes post-división
+    // (en byProduct ya están reflejados en sharedProducts)
+    if (tab.divisionType === "equal") {
+      for (const participant of tab.participants) {
+        for (const p of participant.products) {
+          if (p.productId) {
+            const existing = productsForStock.get(p.productId);
+            if (existing) {
+              existing.units += p.units;
+            } else {
+              productsForStock.set(p.productId, { _id: p.productId, units: p.units, name: p.name });
+            }
+          }
+        }
+      }
+    }
+
+    if (productsForStock.size > 0) {
+      await stockService.processSaleStock(
+        Array.from(productsForStock.values()),
+        companyCode,
+        `OpenTab-${tabId}`
+      );
+    }
 
     await this.updateOne({ _id: tabId }, {
       state: "closed",

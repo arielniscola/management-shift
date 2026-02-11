@@ -6,6 +6,7 @@ import { movementService } from "../services/movements";
 import { IPayment } from "../models/payment";
 import { paymentService } from "../services/payment";
 import { stockService } from "../services/stock";
+import { ProductModel } from "../models/products";
 
 export class MovementController {
   static find: IRouteController<{}, {}, {}, { date: string; client: string }> =
@@ -76,13 +77,26 @@ export class MovementController {
       const created = await movementService.insertOne(movement);
       if (!created) throw new Error("No se creo la venta");
 
-      // Descontar stock de los productos vendidos
+      // Descontar stock de los productos vendidos (excluir los que tienen excludeFromAccounting)
       if (movement.details && movement.details.length > 0) {
-        await stockService.processSaleStock(
-          movement.details,
-          companyCode,
-          movement.identifacationNumber
-        );
+        const detailsForStock = [];
+        for (const detail of movement.details) {
+          if (detail._id) {
+            const prod = await ProductModel.findById(detail._id).lean();
+            if (!prod || !prod.excludeFromAccounting) {
+              detailsForStock.push(detail);
+            }
+          } else {
+            detailsForStock.push(detail);
+          }
+        }
+        if (detailsForStock.length > 0) {
+          await stockService.processSaleStock(
+            detailsForStock,
+            companyCode,
+            movement.identifacationNumber
+          );
+        }
       }
 
       return res
@@ -148,13 +162,27 @@ export class MovementController {
       const movement = await movementService.findOne({ _id: id });
       if (!movement) throw new Error("Venta no encontrada");
 
-      // Revertir el stock de los productos
-      if (movement.details && movement.details.length > 0) {
-        await stockService.revertSaleStock(
-          movement.details,
-          companyCode,
-          movement.identifacationNumber
-        );
+      // No revertir stock para movimientos de cuentas abiertas
+      // (el stock fue descontado al momento de dividir la cuenta)
+      if (!movement.openTabId && movement.details && movement.details.length > 0) {
+        const detailsForStock = [];
+        for (const detail of movement.details) {
+          if (detail._id) {
+            const prod = await ProductModel.findById(detail._id).lean();
+            if (!prod || !prod.excludeFromAccounting) {
+              detailsForStock.push(detail);
+            }
+          } else {
+            detailsForStock.push(detail);
+          }
+        }
+        if (detailsForStock.length > 0) {
+          await stockService.revertSaleStock(
+            detailsForStock,
+            companyCode,
+            movement.identifacationNumber
+          );
+        }
       }
 
       const deleted = await movementService.deleteOne({

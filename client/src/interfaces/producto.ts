@@ -8,4 +8,5 @@ export interface IProduct {
   companyCode?: string;
   stock: number;
   minimumStock: number;
+  excludeFromAccounting?: boolean;
 }

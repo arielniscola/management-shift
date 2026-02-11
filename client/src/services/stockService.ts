@@ -126,6 +126,31 @@ export const validateStock = async (
   }
 };
 
+export interface StockSummary {
+  totalProducts: number;
+  totalUnits: number;
+  totalValue: number;
+}
+
+export const getStockSummary = async (): Promise<StockSummary> => {
+  try {
+    const res = await fetch(`${URL_API}/stock/summary`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    if (res.status === 401) unauthorized();
+    const response = await res.json();
+    if (!res.ok && typeof response.data == "string")
+      throw new Error(response.data);
+    return response.data as StockSummary;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export interface PaginatedMovements {
   movements: IStockMovement[];
   total: number;
@@ -169,6 +194,7 @@ export interface DailySaleItem {
   productName: string;
   productCode: string;
   totalQuantity: number;
+  totalValue: number;
   movements: number;
 }
 

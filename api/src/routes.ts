@@ -317,7 +317,29 @@ const routes = defineRoutes([
         controller: PaymentController.delete,
         auth: true,
       },
+      // Company - Super Admin Password
+      {
+        path: "/company/validate-superadmin",
+        label: "Validar contraseña superadmin",
+        method: "post",
+        controller: CompanyController.validateSuperAdminPassword,
+        auth: true,
+      },
+      {
+        path: "/company/set-superadmin-password",
+        label: "Establecer contraseña superadmin",
+        method: "post",
+        controller: CompanyController.setSuperAdminPassword,
+        auth: true,
+      },
       // Stock
+      {
+        path: "/stock/summary",
+        label: "Resumen de Stock",
+        method: "get",
+        controller: StockController.getStockSummary,
+        auth: true,
+      },
       {
         path: "/stock/movements",
         label: "Movimientos de Stock",

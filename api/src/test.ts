@@ -10,7 +10,7 @@ const CONFIGS = defineOptions({
     secret: "secret",
   },
   db: {
-    uri: process.env.MONGO_URI || "mongodb://127.0.0.1:27017/shiftmanagement",
+    uri: process.env.MONGO_URI || "mongodb://localhost:27017/shiftmanagement",
   },
   logs: {
     path: process.env.LOGS_PATH || "logs",
