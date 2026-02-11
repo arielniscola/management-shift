@@ -49,7 +49,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [stockWarnings, setStockWarnings] = useState<StockValidationWarning[]>([]);
+  const [stockWarnings, setStockWarnings] = useState<StockValidationWarning[]>(
+    [],
+  );
   const [showStockWarningModal, setShowStockWarningModal] = useState(false);
 
   useEffect(() => {
@@ -98,8 +100,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     if (existingItem) {
       setCart(
         cart.map((item) =>
-          item.code === product.code ? { ...item, units: item.units + 1 } : item
-        )
+          item.code === product.code
+            ? { ...item, units: item.units + 1 }
+            : item,
+        ),
       );
     } else {
       setCart([...cart, { ...product, units: 1, price: product.price }]);
@@ -115,16 +119,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     }
     setCart(
       cart.map((item) =>
-        item.code === productCode ? { ...item, units: quantity } : item
-      )
-    );
-  };
-
-  const updatePrice = (productCode: String, price: number) => {
-    setCart(
-      cart.map((item) =>
-        item.code === productCode ? { ...item, price: price } : item
-      )
+        item.code === productCode ? { ...item, units: quantity } : item,
+      ),
     );
   };
 
@@ -154,14 +150,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const updatePaymentAmount = (id: string, amount: number) => {
     setPaymentMethods(
       paymentMethods.map((pm) =>
-        pm.paymentMenthod._id === id ? { ...pm, amount } : pm
-      )
+        pm.paymentMenthod._id === id ? { ...pm, amount } : pm,
+      ),
     );
   };
 
   const removePaymentMethod = (id: string) => {
     setPaymentMethods(
-      paymentMethods.filter((pm) => pm.paymentMenthod._id !== id)
+      paymentMethods.filter((pm) => pm.paymentMenthod._id !== id),
     );
   };
 
@@ -172,8 +168,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     if (newUnits < 1) return;
     setCart(
       cart.map((item, i) =>
-        i === index ? { ...item, units: newUnits } : item
-      )
+        i === index ? { ...item, units: newUnits } : item,
+      ),
     );
   };
 
@@ -187,7 +183,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      product.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   const cleanForm = () => {
     // Reiniciar form
@@ -616,7 +612,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                           onChange={(e) =>
                             updatePaymentAmount(
                               pm.paymentMenthod._id || "",
-                              Number(e.target.value)
+                              Number(e.target.value),
                             )
                           }
                           placeholder="Monto"
